@@ -1,5 +1,2 @@
 # The-Compiler-Strikes-Back
-
-
-
-poop
+This compiler takes javascript code and maps it to machine code. 
