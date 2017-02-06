@@ -85,5 +85,24 @@ function findTokens() {
 			} else {
 				console.log("not a valid lexeme");
 			}		
+	}
+}
 
+// checks to see if continuous characters make up a keyword
+function validKeyword() {
+	var truncatedInput = input.slice(index);
+	possibleKeyword = truncatedInput.match(/.+?\b/);
+	var keywordIndex = possibleKeyword.length+1;
+	if (keywords.indexOf(possibleKeyword) > -1) {
+		if(correctSeparators.indexOf(truncatedInput[keywordIndex]) > -1) {
+			tokenName = possibleKeyword;
+			token_tokenName.push(token_tokenName);
+		} else {
+			console.log("not a valid lexeme");
+		}
+	} else {
+		console.log("not a valid lexeme");
+	}
+
+}
 
