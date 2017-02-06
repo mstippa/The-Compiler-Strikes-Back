@@ -52,5 +52,14 @@ function findTokens() {
 				} else {
 					console.log("not a valid lexeme");
 				}
+			// testing if current token is a digit	
+			} else if (digits.indexOf(currentToken) > -1) {
+				console.log("found a digit");
+				if(correctSeparators.indexOf(nexttoken) > -1) {
+					tokens.token_int.push(currentToken);
+					index++;
+				} else {
+					console.log("not a valid lexeme");
+				}
 
 
