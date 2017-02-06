@@ -33,4 +33,24 @@ function sourceCode() {
 	console.log(tokens);
 }
 
+function findTokens() {
+	console.log("entered findTokens");
+	var currentToken=endFile;
+	while (index < input.length) {
+		console.log("entered while loop");
+		currentToken = input[index];
+		nexttoken = input[index+1];
+			// testing if current token is a character 
+			if (chars.indexOf(currentToken) > -1){
+				console.log("found a character");
+				if (correctSeparators.indexOf(nexttoken) > -1) {
+					tokens.token_id.push(currentToken);
+					index++;
+				} else if (chars.indexOf(nexttoken) > -1) {
+					validKeyword();
+					index++;
+				} else {
+					console.log("not a valid lexeme");
+				}
+
 
