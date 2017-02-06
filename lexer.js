@@ -61,5 +61,18 @@ function findTokens() {
 				} else {
 					console.log("not a valid lexeme");
 				}
+			// testing if current token is a separator 
+			} else if (correctSeparators.indexOf(currentToken) > -1) {
+				console.log("found a separator");
+				if (currentToken === " ") {
+					index++;
+				} else if (currentToken === "=" && nexttoken === "=") {
+					tokens.token_doubleEquals.push(currentToken+nexttoken);
+					index = index + 2;
+				} else {
+					tokenName = tokenName+(separatorNames[correctSeparators.indexOf(currentToken)]); 
+					tokens.tokenName.push(currentToken);
+					index++;
+				}	
 
 
