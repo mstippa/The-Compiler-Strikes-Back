@@ -73,6 +73,17 @@ function findTokens() {
 					tokenName = tokenName+(separatorNames[correctSeparators.indexOf(currentToken)]); 
 					tokens.tokenName.push(currentToken);
 					index++;
-				}	
+				}
+			// testing if token is not equals to 	
+			} else if (currentToken === "!") {
+				if (nexttoken === "=") {
+					tokens.token_notEquals.push(currentToken+nexttoken);
+					index = index + 2;
+				} else {
+					console.log("not a valid lexeme");
+				}
+			} else {
+				console.log("not a valid lexeme");
+			}		
 
 
