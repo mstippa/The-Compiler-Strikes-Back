@@ -23,6 +23,14 @@ var currentToken = "";
 var index = 0; 
 var tokenName ="token_";
 
-
+function sourceCode() {
+	var input = document.getElementById('sourceCode').value; // get the source file
+	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
+	console.log(input);
+	console.log(index);
+	console.log(input.length);
+	findTokens();
+	console.log(tokens);
+}
 
 
