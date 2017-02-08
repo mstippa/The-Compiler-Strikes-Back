@@ -1,13 +1,18 @@
 <html>
 <head>
 <script src="lexer.js" type="text/javascript"></script>	
+<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 	<h1>The Compiler that Struck Back</h1>
-	<div id="input">
-		<textarea id="sourceCode" cols="40" rows="5"></textarea>
-	    <button id="compile" onclick="btnClick();">Compile</button>
-	</div>
-	<div id="output" cols="40" row="5"></div>
+	<div id="body" class="container">
+		<div class="row">
+			<textarea class="col-md-5 col-md-offset-1 inputOutput" id="sourceCode"></textarea>
+			<div id="output" class="col-md-5 inputOutput"></div>
+		</div>
+		<div class="row"><button type="button" class="btn btn-primary col-md-3 col-md-offset-2" id="compile" onclick="compileBtnClick();">Compile</button></div>	
+	</div>	
 </body>
 </html>
