@@ -4,13 +4,9 @@
 */
 
 
-function Token() {
-
-}
-
-var tokens = new Token();
+var tokens = [];
 var specialCharacters = [" ","{","}","(",")",'"',"=","+","$"];
-var specialCharNames = ["space","lbrace", "rbrace","lbrace","rbrace","quote","equals","intop","eof"];
+var specialCharNames = ["space","lbrace", "rbrace","lparen","rparen","quote","equals","intop","eof"];
 var chars = "abcdefghijklmnopqrstuvwxyz";
 var keywords = ["if", "int","true","false","while","print","string","boolean"];
 var possibleKeyword ="";
@@ -25,7 +21,7 @@ function btnClick() {
 	input = document.getElementById('sourceCode').value; // get the source file
 	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
 	findTokens();
-	console.log(tokens.token_id);
+	console.log(tokens[0]+ "    " + tokens[1] + "    " + tokens[2]);
 }
 
 function findTokens() {
@@ -33,14 +29,15 @@ function findTokens() {
 	currentToken=endFile;
 	while (index < input.length) {
 		console.log("entered while loop");
+		console.log(index);
 		currentToken = input[index];
 		console.log(currentToken);
 		nexttoken = input[index+1];
 			// testing if current token is a character 
 			if (chars.indexOf(currentToken) > -1){
 				console.log("found a character");
-				if (specialCharacters.indexOf(nexttoken) > -1 || nexttoken === undefined) {
-				
+				if (specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1)) {
+					tokens[index] = ["token_id", currentToken];
 				} else if (chars.indexOf(nexttoken) > -1) {
 					validKeyword();
 				} else {
@@ -50,24 +47,24 @@ function findTokens() {
 			// testing if current token is a digit	
 			} else if (digits.indexOf(currentToken) > -1) {
 				console.log("found a digit");
-				if(specialCharacters.indexOf(nexttoken) > -1 || nexttoken === undefined) {
-					tokens.token_int.push(currentToken);
+				if(specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1)) {
+					tokens[index] = ["token_digit", currentToken];
 				} else {
 					console.log("not a valid digit");
 				}
 				index++;
 			// testing if current token is a special character 
-			} else if (specialCharacters.indexOf(currentToken) > -1 || nexttoken === undefined) {
+			} else if (specialCharacters.indexOf(currentToken) > -1 || (nexttoken === undefined && input.length === 1)) {
 				console.log("found a separator");
 				if (currentToken === " ") {
-
+					// do nothing
 				} else if (currentToken === "=" && nexttoken === "=") {
-					tokens.token_doubleEquals = tokens.token_doubleEquals + (currentToken+nexttoken);
+					tokens[index] = ["token_doubleEquals", currentToken+nexttoken];
 					index = index + 2;
 					continue;
 				} else {
 					tokenName = tokenName+(specialCharNames[specialCharacters.indexOf(currentToken)]); 
-					tokens.tokenName.push(currentToken);
+					tokens[index] = ["token_"+tokenName,currentToken];
 				}
 				index++;
 			// testing if token is not equals to 	
@@ -94,10 +91,10 @@ function validKeyword() {
 	var keywordIndex = possibleKeyword.length;
 	if (keywords.indexOf(possibleKeyword) > -1) {
 		console.log("found a word");
-		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || truncatedInput[keywordIndex] === undefined) {1
-			tokenName = "token_" + possibleKeyword;
-			tokenName.push(possibleKeyword);
+		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && input.length === possibleKeyword.length)) {1
+			tokens[index] = ["token_"+possibleKeyword, possibleKeyword];
 			index = index + possibleKeyword.length;
+			console.log(index);
 		} else {
 			console.log("not a valid lexeme");
 		}
