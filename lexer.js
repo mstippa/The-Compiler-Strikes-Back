@@ -21,14 +21,12 @@ function btnClick() {
 	input = document.getElementById('sourceCode').value; // get the source file
 	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
 	findTokens();
-	console.log(tokens[0]+ "    " + tokens[1] + "    " + tokens[2]);
+	console.log(tokens[0]+ "    " + tokens[1]);
 }
 
 function findTokens() {
-	console.log("entered findTokens");
-	currentToken=endFile;
+	console.log(input.length);
 	while (index < input.length) {
-		console.log("entered while loop");
 		console.log(index);
 		currentToken = input[index];
 		console.log(currentToken);
@@ -36,25 +34,26 @@ function findTokens() {
 			// testing if current token is a character 
 			if (chars.indexOf(currentToken) > -1){
 				console.log("found a character");
-				if (specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1)) {
+				if (specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1) || nexttoken === "\n") {
 					tokens[index] = ["token_id", currentToken];
 				} else if (chars.indexOf(nexttoken) > -1) {
 					validKeyword();
+					continue;
 				} else {
-					console.log("not a valid character");
+					console.log(currentToken+nexttoken + " is not a valid lexeme");
 				}
 				index++;	
 			// testing if current token is a digit	
 			} else if (digits.indexOf(currentToken) > -1) {
 				console.log("found a digit");
-				if(specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1)) {
+				if(specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1) || nexttoken === "\n") {
 					tokens[index] = ["token_digit", currentToken];
 				} else {
 					console.log("not a valid digit");
 				}
 				index++;
 			// testing if current token is a special character 
-			} else if (specialCharacters.indexOf(currentToken) > -1 || (nexttoken === undefined && input.length === 1)) {
+			} else if (specialCharacters.indexOf(currentToken)) {
 				console.log("found a separator");
 				if (currentToken === " ") {
 					// do nothing
@@ -70,16 +69,18 @@ function findTokens() {
 			// testing if token is not equals to 	
 			} else if (currentToken === "!") {
 				if (nexttoken === "=") {
-					tokens.token_notEquals.push(currentToken+nexttoken);
+					tokens[index] = ["token_notequals", currentToken+nexttoken];
 					index = index + 2;
 					continue;
 				} else {
 					console.log("not a valid lexeme");
 				}
+			} else if (currentToken === "\n") {
+				index++;
+				continue;
 			} else {
 				console.log("not a valid lexeme");
-			}
-			index++;		
+			}	
 	}
 }
 
@@ -96,10 +97,12 @@ function validKeyword() {
 			index = index + possibleKeyword.length;
 			console.log(index);
 		} else {
-			console.log("not a valid lexeme");
+			console.log(possibleKeyword+keywordIndex + " is not a lexeme");
+			index = index + (possibleKeyword+keywordIndex).length;
 		}
 	} else {
-		console.log("not a valid lexeme");
+		console.log(possibleKeyword + " is not a lexeme");
+		index = index + possibleKeyword.length;
 	}
 
 }
