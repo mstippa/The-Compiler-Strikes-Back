@@ -18,12 +18,22 @@ var input = "";
 var tokenName = "";
 
 function compileBtnClick() {
+	init();
 	input = document.getElementById('sourceCode').value; // get the source file
 	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
 	findTokens();
 	displayTokens();
 }
 
+
+function init() {
+	possibleKeyword = "";
+	currentToken = "";
+	index = 0;
+	var input = "";
+	var tokenName = "";
+	document.getElementById("output").innerHTML = "";
+}
 
 function findTokens() {
 	while (index < input.length) {
