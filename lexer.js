@@ -34,7 +34,6 @@ function init() {
 	input = "";
 	tokenName = "";
 	lineCounter = 1;
-	console.log(lineCounter);
 	tokens = [];
 	document.getElementById("output").innerHTML = "";
 }
@@ -43,7 +42,6 @@ function init() {
 
 function findTokens() {
 	while (index < input.length) {
-		console.log(lineCounter);
 		currentToken = input[index];
 		nexttoken = input[index+1];
 			// testing if current token is a character 
