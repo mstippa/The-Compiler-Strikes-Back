@@ -3,7 +3,7 @@
 * 
 */
 
-// globla variables
+// global variables
 var tokens = [];
 var specialCharacters = [" ","{","}","(",")",'"',"=","+","$"];
 var specialCharNames = ["space","lbrace", "rbrace","lparen","rparen","quote","equals","intop","eof"];
@@ -26,7 +26,6 @@ function compileBtnClick() {
 
 
 function findTokens() {
-	console.log(input.length);
 	while (index < input.length) {
 		console.log(index);
 		currentToken = input[index];
@@ -41,21 +40,19 @@ function findTokens() {
 					validKeyword();
 				} else {
 					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
-					index++;
+					index = index + 2;
 				}	
 			// testing if current token is a digit	
 			} else if (digits.indexOf(currentToken) > -1) {
-				console.log("found a digit");
 				if(specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1) || nexttoken === "\n") {
 					tokens[index] = ["token_digit", currentToken];
 					index++;
 				} else {
 					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
-					index++;
+					index = index + 2;
 				}
 			// testing if current token is a special character 
 			} else if (specialCharacters.indexOf(currentToken) > -1) {
-				console.log("found a separator");
 				if (currentToken === " ") {
 					index++
 				} else if (currentToken === "=" && nexttoken === "=") {
@@ -80,9 +77,9 @@ function findTokens() {
 				}
 			} else if (currentToken === "\n") {
 				index++;
-				continue;
 			} else {
 				tokens[index] = [currentToken,"invalid lexeme"];
+				index++
 			}	
 	}
 }
@@ -94,17 +91,15 @@ function validKeyword() {
 	possibleKeyword = possibleKeyword[0];
 	var keywordIndex = possibleKeyword.length;
 	if (keywords.indexOf(possibleKeyword) > -1) {
-		console.log("found a word");
 		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && input.length === possibleKeyword.length) || (truncatedInput[keywordIndex] === "\n")) {
 			tokens[index] = ["token_"+possibleKeyword, possibleKeyword];
 			index = index + possibleKeyword.length;
-			console.log(index);
 		} else {
-			tokens[index] = [possibleKeyword+truncatedInput[keywordIndex], " invalid lexeme"];
+			tokens[index] = [possibleKeyword+truncatedInput[keywordIndex], "invalid lexeme"];
 			index = index + (possibleKeyword+truncatedInput[keywordIndex]).length;
 		}
 	} else {
-		tokens[index] = [possibleKeyword, " invalid lexeme"];
+		tokens[index] = [possibleKeyword, "invalid lexeme"];
 		index = index + possibleKeyword.length;
 	}
 
@@ -113,18 +108,26 @@ function validKeyword() {
 function displayTokens() {
 	var index = 0;
 	var errorCounter = 0;
+	var programCounter = 0;
 	while (index < tokens.length) {
-		if (tokens[index][1] === "invalid lexeme") {
-			document.getElementById("output").inner += '<p>Invalid Lexeme: '+tokens[index][0]+'</p>';
+		if (tokens[index] === undefined) {
+			index++;
+		} else if (tokens[index][1] === "invalid lexeme") {
+			document.getElementById("output").innerHTML += '<p>Invalid Lexeme: '+tokens[index][0]+'</p>';
 			errorCounter++;
+			index++;
 		} else if (tokens[index][1] === "$") {
+			programCounter++;
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>';
-			document.getElementById("output").innerHTML += '<p>Lex completed with '+errorCounter+' errors</p>';
+			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+errorCounter+' errors</p>';
+			document.getElementById("output").innerHTML += '<p>---------------------------------------------------------------------------------</p>';
 			index++;
 			errorCounter = 0;
 		} else {
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>';
 			index++;
+		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
+			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors for program '+programCounter+'</p>';
 		}	
 
 	}
