@@ -4,7 +4,7 @@
 */
 
 // global variables
-var tokens = [];
+var tokens = []; // tokens will be stored as arrays in this array
 var specialCharacters = [" ","{","}","(",")",'"',"=","+","$"];
 var specialCharNames = ["space","lbrace", "rbrace","lparen","rparen","quote","equals","intop","eof"];
 var chars = "abcdefghijklmnopqrstuvwxyz";
@@ -39,21 +39,24 @@ function init() {
 }
 
 
-
+// scans through the input looking for valid tokens
 function findTokens() {
 	while (index < input.length) {
-		currentToken = input[index];
-		nexttoken = input[index+1];
+		currentToken = input[index]; // sets the current token as the current index in input
+		nexttoken = input[index+1]; // sets the next token as the next index in input
 			// testing if current token is a character 
 			if (chars.indexOf(currentToken) > -1){
+				// testing if nexttoken will make the current char a valid id
 				if (specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined) || nexttoken === "\n") {
-					tokens[index] = ["token_id", currentToken, lineCounter];
+					tokens[index] = ["token_id", currentToken, lineCounter]; // passes token name, value, and current line at the current index in tokens
 					index++;
+				// tests if nexttoken is a char	
 				} else if (chars.indexOf(nexttoken) > -1) {
 					validKeyword();
+				// if code reaches here then there is an invalid token
 				} else {
 					tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
-					index = index + 2;
+					index = index + 2; // index gets incremented by 2 to account for the nexttoken
 				}	
 			// testing if current token is a digit	
 			} else if (digits.indexOf(currentToken) > -1) {
@@ -68,13 +71,15 @@ function findTokens() {
 			} else if (specialCharacters.indexOf(currentToken) > -1) {
 				if (currentToken === " ") {
 					index++
+				// testing if currenttoken is double equals	
 				} else if (currentToken === "=" && nexttoken === "=") {
 					tokens[index] = ["token_doubleEquals", currentToken+nexttoken, lineCounter];
 					index = index + 2;
+				// testing if currenttoken is the end of file token
 				} else if (currentToken === "$") {
 					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter]
-
-					index++;	
+					index++;
+				// if code reachers here then token is one of the other special character tokens		
 				} else {
 					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter];
 					index++;
@@ -88,9 +93,11 @@ function findTokens() {
 					tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
 					index++;
 				}
+			// testing if currenttoken is a newline character 	
 			} else if (currentToken === "\n") {
 				index++;
-				lineCounter++;
+				lineCounter++; // increment line counter
+			// if code reachers here then currenttoken is an invalid lexeme	
 			} else {
 				tokens[index] = [currentToken,"invalid lexeme", lineCounter];
 				index++
@@ -100,18 +107,22 @@ function findTokens() {
 
 // checks to see if continuous characters make up a keyword
 function validKeyword() {
-	var truncatedInput = input.slice(index);
-	possibleKeyword = truncatedInput.match(/.+?\b/);
-	possibleKeyword = possibleKeyword[0];
+	var truncatedInput = input.slice(index); // removes everything before the current index from the input
+	possibleKeyword = truncatedInput.match(/.+?\b/); // finds all continouous characters from current index
+	possibleKeyword = possibleKeyword[0]; // match returns an array and the first thing in the array is continous set of characters
 	var keywordIndex = possibleKeyword.length;
+	// tests to see if continous set of characters makes up a keyword
 	if (keywords.indexOf(possibleKeyword) > -1) {
+		// tests to see if token after the continous set of characters will still make the possibleKeyword vailid
 		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && truncatedInput.length === possibleKeyword.length) || (truncatedInput[keywordIndex] === "\n")) {
 			tokens[index] = ["token_"+possibleKeyword, possibleKeyword, lineCounter];
-			index = index + possibleKeyword.length;
+			index = index + possibleKeyword.length; // makes index equal to the next character after the continous set of characters
+		// if code reaches here then keyword was found but following tokens make it invalide
 		} else {
 			tokens[index] = [possibleKeyword+truncatedInput[keywordIndex], "invalid lexeme", lineCounter];
 			index = index + (possibleKeyword+truncatedInput[keywordIndex]).length;
 		}
+	// if code reaches here then continous set of characters do not make a keyword	
 	} else {
 		tokens[index] = [possibleKeyword, "invalid lexeme", lineCounter];
 		index = index + possibleKeyword.length;
@@ -119,29 +130,35 @@ function validKeyword() {
 
 }
 
+// this displays the tokens
 function displayTokens() {
-	var index = 0;
-	var errorCounter = 0;
-	var programCounter = 0;
+	var index = 0; // local index
+	var errorCounter = 0; // keeps track of the number of errors for each program 
+	var programCounter = 0; // keeps track of the number of programs 
 	while (index < tokens.length) {
+		// tests if there is a row in tokens that is undefined and it will be skipped over in that case
 		if (tokens[index] === undefined) {
 			index++;
+		// tests if token value in the value column of the tokens array is an invalid lexeme	
 		} else if (tokens[index][1] === "invalid lexeme") {
-			document.getElementById("output").innerHTML += '<p>Invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>';
+			document.getElementById("output").innerHTML += '<p>Invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>'; // displays the invalid lexem value and where it was found
 			errorCounter++;
 			index++;
+		// tests if token value in the value column of the tokens array is an end of file token
 		} else if (tokens[index][1] === "$") {
-			programCounter++;
-			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>';
-			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+errorCounter+' errors</p>';
+			programCounter++; // update the program counter
+			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>'; // displays the end of file token 
+			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+errorCounter+' errors</p>'; // displays the program number and number of errors
 			document.getElementById("output").innerHTML += '<p>---------------------------------------------------------------------------------</p>';
 			index++;
 			errorCounter = 0;
+		// if here then display the other tokens
 		} else {
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
 			index++;
+		// tests to see if the token value in the last array of tokens is an end of the file token	
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
-			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>';
+			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>'; // displays a warning message
 		}	
 
 	}

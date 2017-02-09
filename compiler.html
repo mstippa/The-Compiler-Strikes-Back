@@ -25,15 +25,12 @@
 	<script type="text/javascript">
 		// displays the dropdown menu and fills the input box with a test case
 		function displayDropdown() {
-			init();
-			document.getElementById("myDropdown").classList.toggle("show");
-			 
+			document.getElementById("myDropdown").classList.toggle("show");	 
 		}
 
 		// closes the dropdown menu when user clicks window
 		window.onclick = function(event) {
 		  if (!event.target.matches(".dropbtn")) {
-
 		    var dropdowns = document.getElementsByClassName("dropdown-content");
 		    var i;
 		    for (i = 0; i < dropdowns.length; i++) {
@@ -45,14 +42,14 @@
 		  }
 		}
 
+		// displays the test cases in the sourceCode box
 		function testCases(test) {
-			init();
 			if (test === 1) {
-				document.getElementById("sourceCode").innerHTML = "{}$\n{{{{{}}}}}$\n{{{{}}}}}$\n{int @}$";
+				document.getElementById("sourceCode").value = "{}$\n{{{{{}}}}}$\n{{{{}}}}}$\n{int @}$";
 			} else if (test === 2) {
-				document.getElementById("sourceCode").innerHTML = 'inta a1 != == string b\n(}})("if"';
+				document.getElementById("sourceCode").value = 'inta a1 != == string b\n(}})("if"';
 			} else if (test === 3) {
-				document.getElementById("sourceCode").innerHTML = '{\n   print() boolean a\n)$true false';
+				document.getElementById("sourceCode").value = '{\n   print() boolean a\n)$true false';
 			} 
 		}
 	</script>	
