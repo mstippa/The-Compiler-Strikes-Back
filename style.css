@@ -1,0 +1,13 @@
+h1 {
+	text-align: center;
+}
+
+#body {
+	margin-top: 75px;
+}
+
+.inputOutput {
+	border: 1px solid black;
+	height: 200px;
+	overflow-y: auto;
+}
