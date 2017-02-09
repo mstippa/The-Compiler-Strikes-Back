@@ -26,7 +26,7 @@ function compileBtnClick() {
 	displayTokens();
 }
 
-
+// clears output box and resets global variables
 function init() {
 	possibleKeyword = "";
 	currentToken = "";
@@ -34,6 +34,8 @@ function init() {
 	input = "";
 	tokenName = "";
 	lineCounter = 1;
+	console.log(lineCounter);
+	tokens = [];
 	document.getElementById("output").innerHTML = "";
 }
 
@@ -41,9 +43,8 @@ function init() {
 
 function findTokens() {
 	while (index < input.length) {
-		console.log(index);
+		console.log(lineCounter);
 		currentToken = input[index];
-		console.log(currentToken);
 		nexttoken = input[index+1];
 			// testing if current token is a character 
 			if (chars.indexOf(currentToken) > -1){
@@ -92,7 +93,6 @@ function findTokens() {
 			} else if (currentToken === "\n") {
 				index++;
 				lineCounter++;
-				console.log("poop");
 			} else {
 				tokens[index] = [currentToken,"invalid lexeme", lineCounter];
 				index++
@@ -140,7 +140,7 @@ function displayTokens() {
 			index++;
 			errorCounter = 0;
 		} else {
-			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+lineCounter+'</p>';
+			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
 			index++;
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
 			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>';
