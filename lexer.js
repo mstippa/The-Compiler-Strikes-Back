@@ -16,6 +16,7 @@ var currentToken = "";
 var index = 0; 
 var input = "";
 var tokenName = "";
+var lineCounter = 1;
 
 function compileBtnClick() {
 	init();
@@ -30,8 +31,9 @@ function init() {
 	possibleKeyword = "";
 	currentToken = "";
 	index = 0;
-	var input = "";
-	var tokenName = "";
+	input = "";
+	tokenName = "";
+	lineCounter = 1;
 	document.getElementById("output").innerHTML = "";
 }
 
@@ -46,21 +48,21 @@ function findTokens() {
 			// testing if current token is a character 
 			if (chars.indexOf(currentToken) > -1){
 				if (specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined) || nexttoken === "\n") {
-					tokens[index] = ["token_id", currentToken];
+					tokens[index] = ["token_id", currentToken, lineCounter];
 					index++;
 				} else if (chars.indexOf(nexttoken) > -1) {
 					validKeyword();
 				} else {
-					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
+					tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
 					index = index + 2;
 				}	
 			// testing if current token is a digit	
 			} else if (digits.indexOf(currentToken) > -1) {
-				if(specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1) || nexttoken === "\n") {
-					tokens[index] = ["token_digit", currentToken];
+				if(specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length-1 === index) || nexttoken === "\n") {
+					tokens[index] = ["token_digit", currentToken, lineCounter];
 					index++;
 				} else {
-					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
+					tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
 					index = index + 2;
 				}
 			// testing if current token is a special character 
@@ -68,27 +70,29 @@ function findTokens() {
 				if (currentToken === " ") {
 					index++
 				} else if (currentToken === "=" && nexttoken === "=") {
-					tokens[index] = ["token_doubleEquals", currentToken+nexttoken];
+					tokens[index] = ["token_doubleEquals", currentToken+nexttoken, lineCounter];
 					index = index + 2;
 				} else if (currentToken === "$") {
-					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken]
+					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter]
 
 					index++;	
 				} else {
-					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken];
+					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter];
 					index++;
 				}
 			// testing if token is not equals to 	
 			} else if (currentToken === "!") {
 				if (nexttoken === "=") {
-					tokens[index] = ["token_notequals", currentToken+nexttoken];
+					tokens[index] = ["token_notequals", currentToken+nexttoken, lineCounter];
 					index = index + 2;
 				} else {
-					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
+					tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
 					index++;
 				}
 			} else if (currentToken === "\n") {
 				index++;
+				lineCounter++;
+				console.log("poop");
 			} else {
 				tokens[index] = [currentToken,"invalid lexeme"];
 				index++
@@ -104,14 +108,14 @@ function validKeyword() {
 	var keywordIndex = possibleKeyword.length;
 	if (keywords.indexOf(possibleKeyword) > -1) {
 		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && truncatedInput.length === possibleKeyword.length) || (truncatedInput[keywordIndex] === "\n")) {
-			tokens[index] = ["token_"+possibleKeyword, possibleKeyword];
+			tokens[index] = ["token_"+possibleKeyword, possibleKeyword, lineCounter];
 			index = index + possibleKeyword.length;
 		} else {
-			tokens[index] = [possibleKeyword+truncatedInput[keywordIndex], "invalid lexeme"];
+			tokens[index] = [possibleKeyword+truncatedInput[keywordIndex], "invalid lexeme", lineCounter];
 			index = index + (possibleKeyword+truncatedInput[keywordIndex]).length;
 		}
 	} else {
-		tokens[index] = [possibleKeyword, "invalid lexeme"];
+		tokens[index] = [possibleKeyword, "invalid lexeme", lineCounter];
 		index = index + possibleKeyword.length;
 	}
 
@@ -125,7 +129,7 @@ function displayTokens() {
 		if (tokens[index] === undefined) {
 			index++;
 		} else if (tokens[index][1] === "invalid lexeme") {
-			document.getElementById("output").innerHTML += '<p>Invalid Lexeme: '+tokens[index][0]+'</p>';
+			document.getElementById("output").innerHTML += '<p>Invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>';
 			errorCounter++;
 			index++;
 		} else if (tokens[index][1] === "$") {
@@ -136,10 +140,10 @@ function displayTokens() {
 			index++;
 			errorCounter = 0;
 		} else {
-			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>';
+			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+lineCounter+'</p>';
 			index++;
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
-			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors for program '+programCounter+'</p>';
+			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>';
 		}	
 
 	}
