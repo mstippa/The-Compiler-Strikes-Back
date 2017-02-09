@@ -3,7 +3,7 @@
 * 
 */
 
-
+// globla variables
 var tokens = [];
 var specialCharacters = [" ","{","}","(",")",'"',"=","+","$"];
 var specialCharNames = ["space","lbrace", "rbrace","lparen","rparen","quote","equals","intop","eof"];
@@ -17,12 +17,13 @@ var index = 0;
 var input = "";
 var tokenName = "";
 
-function btnClick() {
+function compileBtnClick() {
 	input = document.getElementById('sourceCode').value; // get the source file
 	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
 	findTokens();
-	console.log(tokens[0]+ "    " + tokens[1]);
+	displayTokens();
 }
+
 
 function findTokens() {
 	console.log(input.length);
@@ -33,53 +34,55 @@ function findTokens() {
 		nexttoken = input[index+1];
 			// testing if current token is a character 
 			if (chars.indexOf(currentToken) > -1){
-				console.log("found a character");
-				if (specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1) || nexttoken === "\n") {
+				if (specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined) || nexttoken === "\n") {
 					tokens[index] = ["token_id", currentToken];
+					index++;
 				} else if (chars.indexOf(nexttoken) > -1) {
 					validKeyword();
-					continue;
 				} else {
-					console.log(currentToken+nexttoken + " is not a valid lexeme");
-				}
-				index++;	
+					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
+					index++;
+				}	
 			// testing if current token is a digit	
 			} else if (digits.indexOf(currentToken) > -1) {
 				console.log("found a digit");
 				if(specialCharacters.indexOf(nexttoken) > -1 || (nexttoken === undefined && input.length === 1) || nexttoken === "\n") {
 					tokens[index] = ["token_digit", currentToken];
+					index++;
 				} else {
-					console.log("not a valid digit");
+					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
+					index++;
 				}
-				index++;
 			// testing if current token is a special character 
-			} else if (specialCharacters.indexOf(currentToken)) {
+			} else if (specialCharacters.indexOf(currentToken) > -1) {
 				console.log("found a separator");
 				if (currentToken === " ") {
-					// do nothing
+					index++
 				} else if (currentToken === "=" && nexttoken === "=") {
 					tokens[index] = ["token_doubleEquals", currentToken+nexttoken];
 					index = index + 2;
-					continue;
+				} else if (currentToken === "$") {
+					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken]
+
+					index++;	
 				} else {
-					tokenName = tokenName+(specialCharNames[specialCharacters.indexOf(currentToken)]); 
-					tokens[index] = ["token_"+tokenName,currentToken];
+					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken];
+					index++;
 				}
-				index++;
 			// testing if token is not equals to 	
 			} else if (currentToken === "!") {
 				if (nexttoken === "=") {
 					tokens[index] = ["token_notequals", currentToken+nexttoken];
 					index = index + 2;
-					continue;
 				} else {
-					console.log("not a valid lexeme");
+					tokens[index] = [currentToken+nexttoken,"invalid lexeme"];
+					index++;
 				}
 			} else if (currentToken === "\n") {
 				index++;
 				continue;
 			} else {
-				console.log("not a valid lexeme");
+				tokens[index] = [currentToken,"invalid lexeme"];
 			}	
 	}
 }
@@ -92,17 +95,38 @@ function validKeyword() {
 	var keywordIndex = possibleKeyword.length;
 	if (keywords.indexOf(possibleKeyword) > -1) {
 		console.log("found a word");
-		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && input.length === possibleKeyword.length)) {1
+		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && input.length === possibleKeyword.length) || (truncatedInput[keywordIndex] === "\n")) {
 			tokens[index] = ["token_"+possibleKeyword, possibleKeyword];
 			index = index + possibleKeyword.length;
 			console.log(index);
 		} else {
-			console.log(possibleKeyword+keywordIndex + " is not a lexeme");
-			index = index + (possibleKeyword+keywordIndex).length;
+			tokens[index] = [possibleKeyword+truncatedInput[keywordIndex], " invalid lexeme"];
+			index = index + (possibleKeyword+truncatedInput[keywordIndex]).length;
 		}
 	} else {
-		console.log(possibleKeyword + " is not a lexeme");
+		tokens[index] = [possibleKeyword, " invalid lexeme"];
 		index = index + possibleKeyword.length;
+	}
+
+}
+
+function displayTokens() {
+	var index = 0;
+	var errorCounter = 0;
+	while (index < tokens.length) {
+		if (tokens[index][1] === "invalid lexeme") {
+			document.getElementById("output").inner += '<p>Invalid Lexeme: '+tokens[index][0]+'</p>';
+			errorCounter++;
+		} else if (tokens[index][1] === "$") {
+			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>';
+			document.getElementById("output").innerHTML += '<p>Lex completed with '+errorCounter+' errors</p>';
+			index++;
+			errorCounter = 0;
+		} else {
+			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>';
+			index++;
+		}	
+
 	}
 
 }
