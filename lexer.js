@@ -94,7 +94,7 @@ function findTokens() {
 				lineCounter++;
 				console.log("poop");
 			} else {
-				tokens[index] = [currentToken,"invalid lexeme"];
+				tokens[index] = [currentToken,"invalid lexeme", lineCounter];
 				index++
 			}	
 	}
