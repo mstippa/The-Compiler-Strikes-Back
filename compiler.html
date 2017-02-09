@@ -14,13 +14,47 @@
 		</div>
 		<div class="row"><button type="button" class="btn btn-primary col-md-3 col-md-offset-2" id="compile" onclick="compileBtnClick();">Compile</button></div>
 		<div class="row dropdown">
-			<button type="button" class="dropbtn btn btn-primary" onclick="testCases()">Test Cases</button>
+			<button type="button" class="dropbtn btn btn-primary" onclick="displayDropdown()">Test Cases</button>
 			<div id="myDropdown" class="dropdown-content">
-				<a href="#test1">Test 1</a>
-				<a href="#test2">Test 2</a>
-				<a href="#test3">Test 3</a>
+				<a href="#test1" onclick="testCases(1)">Test 1</a>
+				<a href="#test2" onclick="testCases(2)">Test 2</a>
+				<a href="#test3" onclick="testCases(3)">Test 3</a>
 			</div>
 		</div>			
-	</div>	
+	</div>
+	<script type="text/javascript">
+		// displays the dropdown menu and fills the input box with a test case
+		function displayDropdown() {
+			init();
+			document.getElementById("myDropdown").classList.toggle("show");
+			 
+		}
+
+		// closes the dropdown menu when user clicks window
+		window.onclick = function(event) {
+		  if (!event.target.matches(".dropbtn")) {
+
+		    var dropdowns = document.getElementsByClassName("dropdown-content");
+		    var i;
+		    for (i = 0; i < dropdowns.length; i++) {
+		      var openDropdown = dropdowns[i];
+		      if (openDropdown.classList.contains("show")) {
+		        openDropdown.classList.remove("show");
+		      }
+		    }
+		  }
+		}
+
+		function testCases(test) {
+			init();
+			if (test === 1) {
+				document.getElementById("sourceCode").innerHTML = "{}$\n{{{{{}}}}}$\n{{{{}}}}}$\n{int @}$";
+			} else if (test === 2) {
+				document.getElementById("sourceCode").innerHTML = 'inta a1 != == string b\n(}})("if"';
+			} else if (test === 3) {
+				document.getElementById("sourceCode").innerHTML = '{\n   print() boolean a\n)$true false';
+			} 
+		}
+	</script>	
 </body>
 </html>

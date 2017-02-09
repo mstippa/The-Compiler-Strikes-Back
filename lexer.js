@@ -35,26 +35,7 @@ function init() {
 	document.getElementById("output").innerHTML = "";
 }
 
-// displays the dropdown menu and fills the input box with a test case
-function testCases() {
-	init();
-	 document.getElementById("myDropdown").classList.toggle("show");
-}
 
-// closes the dropdown menu when user clicks window
-window.onclick = function(event) {
-  if (!event.target.matches('.dropbtn')) {
-
-    var dropdowns = document.getElementsByClassName("dropdown-content");
-    var i;
-    for (i = 0; i < dropdowns.length; i++) {
-      var openDropdown = dropdowns[i];
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
-    }
-  }
-}
 
 function findTokens() {
 	while (index < input.length) {
@@ -122,7 +103,7 @@ function validKeyword() {
 	possibleKeyword = possibleKeyword[0];
 	var keywordIndex = possibleKeyword.length;
 	if (keywords.indexOf(possibleKeyword) > -1) {
-		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && input.length === possibleKeyword.length) || (truncatedInput[keywordIndex] === "\n")) {
+		if(specialCharacters.indexOf(truncatedInput[keywordIndex]) > -1 || (truncatedInput[keywordIndex] === undefined && truncatedInput.length === possibleKeyword.length) || (truncatedInput[keywordIndex] === "\n")) {
 			tokens[index] = ["token_"+possibleKeyword, possibleKeyword];
 			index = index + possibleKeyword.length;
 		} else {
