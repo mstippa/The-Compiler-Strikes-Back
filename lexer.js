@@ -55,8 +55,9 @@ function findTokens() {
 					validKeyword();
 				// if code reaches here then there is an invalid token
 				} else {
-					tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
-					index = index + 2; // index gets incremented by 2 to account for the nexttoken
+					identifyInvalidLexeme()
+					//tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
+					//index = index + 2; // index gets incremented by 2 to account for the nexttoken
 				}	
 			// testing if current token is a digit	
 			} else if (digits.indexOf(currentToken) > -1) {
@@ -64,8 +65,9 @@ function findTokens() {
 					tokens[index] = ["token_digit", currentToken, lineCounter];
 					index++;
 				} else {
-					tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
-					index = index + 2;
+					identifyInvalidLexeme();
+					//tokens[index] = [currentToken+nexttoken,"invalid lexeme", lineCounter];
+					//index = index + 2;
 				}
 			// testing if current token is a special character 
 			} else if (specialCharacters.indexOf(currentToken) > -1) {
@@ -126,6 +128,28 @@ function validKeyword() {
 	} else {
 		tokens[index] = [possibleKeyword, "invalid lexeme", lineCounter];
 		index = index + possibleKeyword.length;
+	}
+
+}
+
+// identifies an invalid lexeme 
+function identifyInvalidLexeme() {
+	var i = index; // a local index
+	var n;
+	var invalidLexeme = "";
+	while (i < input.length) {
+		currenttoken = input[i];
+		n = input[i+1]
+		// tests if the nexttoken is a character or digit which extends the lexeme
+		if (chars.indexOf(n) > -1 || digits.indexOf(n) > -1) {
+			invalidLexeme = invalidLexeme + currenttoken;
+			i++;
+		// if code reaches here then the next token is no longer a character of digit	
+		} else {
+			tokens[index] = [invalidLexeme+currenttoken,"invalid lexeme", lineCounter];
+			index = i + 1; 
+			break;
+		}
 	}
 
 }
