@@ -156,7 +156,6 @@ function validateString() {
 				if ((chars.indexOf(string[j]) > -1 || digits.indexOf(string[j]) > -1 || specialCharacters.indexOf(string[j]) > -1) && string[j] !== "$") {
 					j++;
 				} else if (string[j] === "\n") {
-					console.log("fuck");
 					tokens[i] = ["\n", "String can't take up multiple lines", lineCounter];
 					index = index + string.length +1;
 					break;
