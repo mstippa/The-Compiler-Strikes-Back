@@ -152,7 +152,6 @@ function validateString() {
 		} else  {
 			var j = 0;
 			while (j < string.length+1) {
-				console.log(string);
 				if ((chars.indexOf(string[j]) > -1 || digits.indexOf(string[j]) > -1 || specialCharacters.indexOf(string[j]) > -1) && string[j] !== "$") {
 					j++;
 				} else if (string[j] === "\n") {
