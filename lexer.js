@@ -84,7 +84,6 @@ function findTokens() {
 					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter]
 					index++;
 				} else if (currentToken === '"' && quoteCounter === 0) {
-					console.log("shite");
 					tokens[index] = ["token_quote", currentToken, lineCounter];
 					validateString();
 					quoteCounter++;
@@ -144,7 +143,6 @@ function validKeyword() {
 }
 
 function validateString() {
-	console.log("dick");
 	var truncatedInput = input.slice(index + 1);
 	if (/"/.test(truncatedInput)) {
 		var i = index;
