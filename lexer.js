@@ -36,6 +36,7 @@ function init() {
 	tokenName = "";
 	lineCounter = 1;
 	tokens = [];
+	quoteCounter = 0;
 	document.getElementById("output").innerHTML = "";
 }
 
@@ -44,7 +45,6 @@ function init() {
 function findTokens() {
 	while (index < input.length) {
 		currentToken = input[index]; // sets the current token as the current index in input
-		console.log(currentToken);
 		nexttoken = input[index+1]; // sets the next token as the next index in input
 			// testing if current token is a character 
 			if (chars.indexOf(currentToken) > -1){
@@ -83,12 +83,15 @@ function findTokens() {
 				} else if (currentToken === "$") {
 					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter]
 					index++;
-				} else if (currentToken === '"' && quoteCounter % 2 === 0) {
+				} else if (currentToken === '"' && quoteCounter === 0) {
+					console.log("shite");
 					tokens[index] = ["token_quote", currentToken, lineCounter];
 					validateString();
-				} else if (currentToken === '"' && quoteCounter % 2 !== 0) {
+					quoteCounter++;
+				} else if (currentToken === '"' && quoteCounter === 1) {
 					tokens[index] = ["token_quote", currentToken, lineCounter];
 					index++;	
+					quoteCounter = 0;
 				// if code reachers here then token is one of the other special character tokens		
 				} else {
 					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter];
@@ -141,37 +144,54 @@ function validKeyword() {
 }
 
 function validateString() {
-	var i = index;
-	var n;
-	var string = "";
-	while (i < input.length) {
-		n = input[i+1];
-		if (n !== '"') {
-			string = string + n;
-			i++;
-		} else  {
-			var j = 0;
-			while (j < string.length+1) {
-				if ((chars.indexOf(string[j]) > -1 || digits.indexOf(string[j]) > -1 || specialCharacters.indexOf(string[j]) > -1) && string[j] !== "$") {
-					j++;
-				} else if (string[j] === "\n") {
-					tokens[i] = ["\n", "String can't take up multiple lines", lineCounter];
-					index = index + string.length +1;
-					break;
-				} else if (string[j] === "$") {
-					tokens[i] = ["$", "End of file character can't be in a string", lineCounter];
-					index = index + string.length +1;
-					break;	
-				} else {
-					tokens[i] = ["token_string", string, lineCounter];
-					index = index + string.length +1;
-					j++;
-				}
-			}
-			quoteCounter = 1;
-			break;
+	console.log("dick");
+	var truncatedInput = input.slice(index + 1);
+	if (/"/.test(truncatedInput)) {
+		var i = index;
+		var n;
+		var string = "";
+		while (i < input.length) {
+			n = input[i+1];
+			if (n === '"') { 
+				var j = 0;
+				while (j < string.length+1) { 
+					if (chars.indexOf(string[j]) > -1 || string[j] === " ") { 
+						j++;
+					} else if (string[j] === "\n") { 
+						tokens[i] = ["\n", "newline character isn't a valid string character", lineCounter];
+						index = index + string.length+1;
+						break;
+					} else if (string[j] === "$") {
+						tokens[i] = ["string_end_file", "End of file character can't be in a string", lineCounter];
+						index = index + string.length+1;
+						break;
+					} else if ((digits.indexOf(string[j]) > -1 || specialCharacters.indexOf(string[j]) > -1) && string[j] !== '"') {
+						tokens[i] = ["invalid string", string, lineCounter];
+						index = index + string.length+1;
+						break;	
+					} else {
+						tokens[i] = ["token_string", string, lineCounter];
+						index = index + string.length+1;
+						break;
+					}	
+				}	
+				break;
+			} else if (n !== '"' && n !== undefined) {  
+				console.log(n);
+				string = string + n;
+				i++;
+			}	
+		}	
+	} else {
+		console.log("poop");
+		tokens[index] = ["missing quote", lineCounter];
+		if (/\$/.test(truncatedInput)) {
+			index = index + truncatedInput.indexOf("$");
+		} else {
+			index = input.length;
 		}
 	}
+
 }
 
 // identifies an invalid lexeme 
@@ -207,7 +227,7 @@ function displayTokens() {
 			index++;
 		// tests if token value in the value column of the tokens array is an invalid lexeme	
 		} else if (tokens[index][1] === "invalid lexeme") {
-			document.getElementById("output").innerHTML += '<p>Invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>'; // displays the invalid lexem value and where it was found
+			document.getElementById("output").innerHTML += '<p>Error, invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>'; // displays the invalid lexem value and where it was found
 			errorCounter++;
 			index++;
 		// tests if token value in the value column of the tokens array is an end of file token
@@ -220,11 +240,21 @@ function displayTokens() {
 			errorCounter = 0;
 		// if here then display the other tokens
 		} else if (tokens[index][0] === "\n") {
-			document.getElementById("output").innerHTML += '<p>'+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
-			index++;
-		} else if (tokens[index[0]] === "$") {
 			document.getElementById("output").innerHTML += '<p>Error: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
-			index++;	
+			errorCounter++;
+			index++;
+		} else if (tokens[index][0] === "string_end_file") {
+			document.getElementById("output").innerHTML += '<p>Error: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
+			errorCounter++;
+			index++;
+		} else if (tokens[index][0] === "invalid string") {
+			document.getElementById("output").innerHTML += '<p>'+tokens[index][1]+' is not a valid string at line '+tokens[index][2]+'</p>';	
+			errorCounter++;
+			index++	
+		} else if (tokens[index][0] === "missing quote") {
+			document.getElementById("output").innerHTML += '<p>Error, program '+programCounter+' is missing quotes</p>';
+			errorCounter++;
+			index++;
 		} else {
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
 			index++;
