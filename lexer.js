@@ -168,8 +168,14 @@ function validateString() {
 						index = index + string.length+1;
 						break;	
 					} else {
-						tokens[i] = ["token_string", string, lineCounter];
-						index = index + string.length+1;
+						index++;
+						var k = 0;
+						while (k < string.length) {
+							tokens[index] = ["token_char", string[k], lineCounter];
+							console.log(string[k]);
+							index++;
+							k++;
+						}	
 						break;
 					}	
 				}	
