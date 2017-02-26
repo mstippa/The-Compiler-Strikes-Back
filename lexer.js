@@ -233,32 +233,32 @@ function displayTokens() {
 		} else if (tokens[index][1] === "invalid lexeme") {
 			document.getElementById("output").innerHTML += '<p>Error, invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>'; // displays the invalid lexem value and where it was found
 			errorCounter++;
-			index++;
+			tokens.splice(index, 1);
 		// tests if token value in the value column of the tokens array is an end of file token
 		} else if (tokens[index][1] === "$") {
 			programCounter++; // update the program counter
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>'; // displays the end of file token 
 			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+errorCounter+' errors</p>'; // displays the program number and number of errors
-			document.getElementById("output").innerHTML += '<p>---------------------------------------------------------------------------------</p>';
+			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
 			index++;
 			errorCounter = 0;
 		// if here then display the other tokens
 		} else if (tokens[index][0] === "\n") {
 			document.getElementById("output").innerHTML += '<p>Error: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
 			errorCounter++;
-			index++;
+			tokens.splice(index, 1);
 		} else if (tokens[index][0] === "string_end_file") {
 			document.getElementById("output").innerHTML += '<p>Error: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
 			errorCounter++;
-			index++;
+			tokens.splice(index, 1);
 		} else if (tokens[index][0] === "invalid string") {
 			document.getElementById("output").innerHTML += '<p>'+tokens[index][1]+' is not a valid string at line '+tokens[index][2]+'</p>';	
 			errorCounter++;
-			index++	
+			tokens.splice(index, 1);
 		} else if (tokens[index][0] === "missing quote") {
 			document.getElementById("output").innerHTML += '<p>Error, program '+programCounter+' is missing quotes</p>';
 			errorCounter++;
-			index++;
+			tokens.splice(index, 1);
 		} else {
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
 			index++;
