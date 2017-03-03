@@ -8,8 +8,14 @@ h1 {
 
 .inputOutput {
 	border: 1px solid black;
-	height: 200px;
+	height: 400px;
 	overflow-y: auto;
+}
+
+#tree {
+    border: 1px solid black;
+    height: 300px;
+    overflow-y: auto;
 }
 
 .dropbtn {
