@@ -25,6 +25,7 @@ function compileBtnClick() {
 	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
 	findTokens();
 	displayTokens();
+	parse();
 }
 
 // clears output box and resets global variables
@@ -81,7 +82,7 @@ function findTokens() {
 					index = index + 2;
 				// testing if currenttoken is the end of file token
 				} else if (currentToken === "$") {
-					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter]
+					tokens[index] = ["token_"+specialCharNames[specialCharacters.indexOf(currentToken)],currentToken, lineCounter];
 					index++;
 				} else if (currentToken === '"' && quoteCounter === 0) {
 					tokens[index] = ["token_quote", currentToken, lineCounter];
@@ -237,6 +238,7 @@ function displayTokens() {
 		// tests if token value in the value column of the tokens array is an end of file token
 		} else if (tokens[index][1] === "$") {
 			programCounter++; // update the program counter
+			tokens[index][3] = programCounter; // add the program number as an attribute to the end of program token
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>'; // displays the end of file token 
 			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+errorCounter+' errors</p>'; // displays the program number and number of errors
 			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
