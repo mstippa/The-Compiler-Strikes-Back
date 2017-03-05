@@ -9,7 +9,8 @@ var specialCharacters = [" ","{","}","(",")",'"',"=","+","$"];
 var specialCharNames = ["space","lbrace", "rbrace","lparen","rparen","quote","equals","intop","eof"];
 var chars = "abcdefghijklmnopqrstuvwxyz";
 var keywords = ["if", "int","true","false","while","print","string","boolean"];
-var possibleKeyword ="";
+var typeKeywords = ["int", "string", "boolean"];
+var possibleKeywords ="";
 var endFile = "$";
 var digits = ["0","1","2","3","4","5","6","7","8","9"];
 var currentToken = "";
@@ -173,7 +174,6 @@ function validateString() {
 						var k = 0;
 						while (k < string.length) {
 							tokens[index] = ["token_char", string[k], lineCounter];
-							console.log(string[k]);
 							index++;
 							k++;
 						}	
@@ -182,13 +182,11 @@ function validateString() {
 				}	
 				break;
 			} else if (n !== '"' && n !== undefined) {  
-				console.log(n);
 				string = string + n;
 				i++;
 			}	
 		}	
 	} else {
-		console.log("poop");
 		tokens[index] = ["missing quote", lineCounter];
 		if (/\$/.test(truncatedInput)) {
 			index = index + truncatedInput.indexOf("$");
@@ -266,6 +264,7 @@ function displayTokens() {
 			index++;
 		// tests to see if the token value in the last array of tokens is an end of the file token	
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
+			tokens[index] = ["no_eof"];
 			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>'; // displays a warning message
 		}	
 
