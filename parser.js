@@ -14,15 +14,13 @@ var tree = new Tree();
 
 function match() {
 	parseIndex++;
-	console.log(parseIndex);
 	currentTokenValue = tokens[parseIndex][1];
 }
 
 function parse () {
 	currentTokenValue = tokens[parseIndex][1];
-	nextTokenValue = tokens[parseIndex+1][1];
 	parseProgram();
-	document.getElementById("tree").innerHTML += tree;
+	displayParseOutcome();
 }
 
 
@@ -30,8 +28,9 @@ function parseProgram() {
 	tree.addNode("Program", "branch");
 	parseBlock(); 
 	if (currentTokenValue !== "$") {
-		parseErrors[errorCounter] = tokens[parseIndex];
+		parseErrors[errorCounter] = ["$", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
+		match();
 		document.getElementById("output").innerHTML += '<p>Parse error on line  '+tokens[parseIndex][2]+'. Expecting "$" but got '+tokens[parseIndex+1][1]+'</p>';
 	} else {
 		tree.addNode("$", "leaf");
@@ -44,11 +43,10 @@ function parseProgram() {
 function parseBlock() {
 	tree.addNode("Block", "branch");
 	if (currentTokenValue === "{" && tokens[parseIndex+1][1] === "}") {
-		tree.addNode("StatementList", "branch");
 		tree.addNode("{","leaf");
 		tree.endChildren();
-		console.log(currentTokenValue)
 		match();
+		tree.addNode("StatementList", "branch");
 		tree.addNode("","leaf");
 		tree.endChildren();
 		tree.addNode("}", "leaf");
@@ -64,12 +62,12 @@ function parseBlock() {
 			tree.endChildren();
 			match();
 		} else {
-			parseErrors[errorCounter] = ["}", currentTokenValue];
+			parseErrors[errorCounter] = ["}", currentTokenValue, tokens[parseIndex][2]];
 			errorCounter++;
 			match();
 		}
 	} else {
-		parseErrors[errorCounter] = ["{", currentTokenValue];
+		parseErrors[errorCounter] = ["{", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -104,7 +102,7 @@ function parseStatement() {
 	} else if (currentTokenValue === "{") {
 		parseBlock();
 	} else {
-		parseErrors[errorCounter] = ["Statement", currentTokenValue];
+		parseErrors[errorCounter] = ["Statement", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -119,7 +117,7 @@ function parsePrintStatement() {
 		match();
 		parseExpr();
 	} else {
-		parseErrors[errorCounter] = ["(", currentTokenValue];
+		parseErrors[errorCounter] = ["(", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}
@@ -135,7 +133,7 @@ function parseAssignmentStatement() {
 		match();
 		parseExpr();
 	} else {
-		parseErrors[errorCounter] = ["=", currentTokenValue];
+		parseErrors[errorCounter] = ["=", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -180,7 +178,7 @@ function parseExpr() {
 	} else if (chars.indexOf(currentTokenValue) > -1) {
 		parseId();
 	} else {
-		parseErrors[errorCounter] = ["ParseExpr", currentTokenValue];
+		parseErrors[errorCounter] = ["ParseExpr", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -211,7 +209,7 @@ function parseStringExpr() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ['"', currentTokenValue];
+		parseErrors[errorCounter] = ['"', currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}
@@ -234,7 +232,7 @@ function parseBooleanExpr() {
 			tree.endChildren();
 			match();
 		} else {
-			parseErrors[errorCounter] = [")", currentTokenValue];
+			parseErrors[errorCounter] = [")", currentTokenValue, tokens[parseIndex][2]];
 			errorCounter++;
 			match();
 		}
@@ -259,7 +257,7 @@ function parseCharList() {
 	} else if (currentTokenValue === '"') {
 		// do nothing
 	} else {
-		parseErrors[errorCounter] = ["space or character", currentTokenValue];
+		parseErrors[errorCounter] = ["space or character", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -274,7 +272,7 @@ function parseType() {
 		match();
 		parseId();
 	} else {
-		parseErrors[errorCounter] = ["type keyword", currentTokenValue];
+		parseErrors[errorCounter] = ["type keyword", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -288,7 +286,7 @@ function parseChar() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["Id", currentTokenValue];
+		parseErrors[errorCounter] = ["Id", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -310,7 +308,7 @@ function parseDigit() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["digit", currentTokenValue];
+		parseErrors[errorCounter] = ["digit", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}
@@ -324,7 +322,7 @@ function parseBoolop() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["Boolop", currentTokenValue];
+		parseErrors[errorCounter] = ["Boolop", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}
@@ -338,7 +336,7 @@ function parseBoolVal() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["boolval", currentTokenValue];
+		parseErrors[errorCounter] = ["boolval", currentTokenValue, tokens[parseIndex][2]];
 		errorCounter++;
 		match();
 	}	
@@ -443,8 +441,17 @@ function Tree() {
 
 
 function displayParseOutcome() {
-	document.getElementById("output").innerHTML += '<p>Parse error on line  '+tokens[parseIndex][2]+'. Expecting "$" but got '+tokens[parseIndex+1][1]+'</p>';
-	document.getElementById("output").innerHTML += '<p>Parse completed for program   '+tokens[parseIndex][3]+'</p>';
+	var i = 0;
+	if (parseErrors.length > 0) {
+		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+tokens[i][3]+'</p>';
+		while (i < parseErrors.length) {
+			document.getElementById("output").innerHTML += '<p>Parse error on line '+errorCounter[i][2]+'. Expecting '+errorCounter[i][0]+' but got '+errorCounter[i][2]+'</p>';
+			i++;
+		}
+	} else {
+		document.getElementById("output").innerHTML += '<p>Parse completed for program '+tokens[i][3]+'</p>';
+		document.getElementById("tree").innerHTML += tree;
+	}
 }
 
 
