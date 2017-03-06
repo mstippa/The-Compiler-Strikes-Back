@@ -26,7 +26,7 @@ function compileBtnClick() {
 	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
 	findTokens();
 	displayTokens();
-	parse();
+	//parse();
 }
 
 // clears output box and resets global variables
@@ -225,9 +225,12 @@ function displayTokens() {
 	var errorCounter = 0; // keeps track of the number of errors for each program 
 	var programCounter = 0; // keeps track of the number of programs 
 	while (index < tokens.length) {
+		console.log(tokens[index]);
 		// tests if there is a row in tokens that is undefined and it will be skipped over in that case
 		if (tokens[index] === undefined) {
-			index++;
+			tokens.splice(index,1);
+			console.log(index);
+			console.log(tokens.length);
 		// tests if token value in the value column of the tokens array is an invalid lexeme	
 		} else if (tokens[index][1] === "invalid lexeme") {
 			document.getElementById("output").innerHTML += '<p>Error, invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>'; // displays the invalid lexem value and where it was found
@@ -267,6 +270,7 @@ function displayTokens() {
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
 			tokens[index] = ["no_eof"];
 			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>'; // displays a warning message
+			index++;
 		}	
 
 	}
