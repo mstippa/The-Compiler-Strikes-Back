@@ -261,6 +261,7 @@ function displayTokens() {
 			tokens.splice(index, 1);
 		} else {
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
+			tokens[index][3] = programCounter;
 			index++;
 		// tests to see if the token value in the last array of tokens is an end of the file token	
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
