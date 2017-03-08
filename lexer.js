@@ -20,28 +20,6 @@ var tokenName = "";
 var lineCounter = 1;
 var quoteCounter = 0;
 
-function compileBtnClick() {
-	init();
-	input = document.getElementById('sourceCode').value; // get the source file
-	input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
-	findTokens();
-	displayTokens();
-	parse();
-}
-
-// clears output box and resets global variables
-function init() {
-	possibleKeyword = "";
-	currentToken = "";
-	index = 0;
-	input = "";
-	tokenName = "";
-	lineCounter = 1;
-	tokens = [];
-	quoteCounter = 0;
-	document.getElementById("output").innerHTML = "";
-}
-
 
 // scans through the input looking for valid tokens
 function findTokens() {
@@ -228,6 +206,8 @@ function displayTokens() {
 		// tests if there is a row in tokens that is undefined and it will be skipped over in that case
 		if (tokens[index] === undefined) {
 			tokens.splice(index,1);
+		} else if (tokens[index][1] === "invalid lexeme" && tokens[index][0] === "") {
+			console.log("shit");
 		// tests if token value in the value column of the tokens array is an invalid lexeme	
 		} else if (tokens[index][1] === "invalid lexeme") {
 			document.getElementById("output").innerHTML += '<p>Error, invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>'; // displays the invalid lexem value and where it was found

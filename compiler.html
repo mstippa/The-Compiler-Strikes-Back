@@ -29,6 +29,31 @@
 			<div id="tree" class="col-md-4 col-md-offset-4"></div>			
 	</div>
 	<script type="text/javascript">
+
+		function compileBtnClick() {
+			init();
+			input = document.getElementById('sourceCode').value; // get the source file
+			input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
+			findTokens();
+			displayTokens();
+			parse();
+		}
+
+		// clears output box and resets global variables
+		function init() {
+			possibleKeyword = "";
+			currentToken = "";
+			index = 0;
+			input = "";
+			tokenName = "";
+			lineCounter = 1;
+			tokens = [];
+			quoteCounter = 0;
+			document.getElementById("output").innerHTML = "";
+			document.getElementById("tree").innerHTML = "";
+		}
+
+
 		// displays the dropdown menu and fills the input box with a test case
 		function displayDropdown() {
 			document.getElementById("myDropdown").classList.toggle("show");	 
