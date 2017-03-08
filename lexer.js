@@ -246,7 +246,9 @@ function displayTokens() {
 		// tests to see if the token value in the last array of tokens is an end of the file token	
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
 			tokens[index] = ["no_eof"];
+			tokens.splice(index, 1);
 			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>'; // displays a warning message
+			programCounter++;
 			index++;
 		}	
 
