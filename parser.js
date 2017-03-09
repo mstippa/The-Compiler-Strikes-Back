@@ -52,9 +52,7 @@ function parseBlock() {
 			if (tokens[parseIndex][1] === "}") {
 				tree.addNode("StatementList", "branch");
 				tree.addNode("","leaf");
-				tree.endChildren();
 				tree.addNode("}", "leaf");
-				tree.endChildren();
 				match();
 			} else {
 				parseStatementList();
@@ -62,7 +60,6 @@ function parseBlock() {
 				if (!parseErrors.length > 0) {
 					if (currentTokenValue === "}") {
 						tree.addNode("}","leaf");
-						tree.endChildren();
 						match();
 					} else {
 						parseErrors = ["}", currentTokenValue, tokens[parseIndex][2]];
@@ -131,17 +128,14 @@ function parseStatement() {
 function parsePrintStatement() {
 	tree.addNode("PrintStatement", "branch");
 	tree.addNode("print", "leaf");
-	tree.endChildren();
 	match();
 	if (currentTokenValue === "(") {
 		tree.addNode("(", "leaf");
-		tree.endChildren();
 		match();
 		parseExpr();
 		tree.endChildren();
 		if (currentTokenValue === ")") {
 			tree.addNode(")", "leaf");
-			tree.endChildren();
 			match();
 		} else {
 			parseErrors = [")", currentTokenValue, tokens[parseIndex][2]];
@@ -158,10 +152,8 @@ function parseAssignmentStatement() {
 	tree.endChildren();
 	if (currentTokenValue === "=") {
 		tree.addNode("=", "leaf");
-		tree.endChildren();
 		match();
 		parseExpr();
-		tree.endChildren();
 	} else {
 		parseErrors = ["=", currentTokenValue, tokens[parseIndex][2]];
 	}	
@@ -179,8 +171,7 @@ function parseVarDecl() {
 
 function parseWhileStatement() {
 	tree.addNode("WhileStatement", "branch");
-	tree.addNode("While", "leaf");
-	tree.endChildren();
+	tree.addNode("while", "leaf");
 	match();
 	parseBooleanExpr();
 	tree.endChildren();
@@ -195,8 +186,7 @@ function parseWhileStatement() {
 
 function parseIfStatement() {
 	tree.addNode("IfExpr", "branch");
-	tree.addNode("If", "leaf");
-	tree.endChildren();
+	tree.addNode("if", "leaf");
 	match();
 	parseBooleanExpr();
 	tree.endChildren();
@@ -232,7 +222,6 @@ function parseExpr() {
 function parseIntExpr() {
 	tree.addNode("IntExpr", "branch");
 	tree.addNode(currentTokenValue, "leaf");
-	tree.endChildren();
 	match();
 	parseDigit();
 	tree.endChildren();
@@ -256,14 +245,12 @@ function parseIntExpr() {
 function parseStringExpr() {
 	tree.addNode("StringExpr", "branch");
 	tree.addNode('"', "leaf");
-	tree.endChildren();
 	match();
 	parseCharList();
 	tree.endChildren();
 	if (!parseErrors.length > 0) {
 		if (currentTokenValue === '"') {
 			tree.addNode('"', "leaf");
-			tree.endChildren();
 			match();
 		} else {
 			parseErrors = ['"', currentTokenValue, tokens[parseIndex][2]];
@@ -281,7 +268,6 @@ function parseBooleanExpr() {
 		tree.endChildren();
 	} else if (currentTokenValue === "(") {
 		tree.addNode("(", "leaf");
-		tree.endChildren();
 		match();
 		parseExpr();
 		tree.endChildren();
@@ -294,7 +280,6 @@ function parseBooleanExpr() {
 				if (!parseErrors.length > 0) {
 					if (currentTokenValue === ")") {
 						tree.addNode(")", "leaf");
-						tree.endChildren();
 						match();
 					} else {
 						parseErrors = [")", currentTokenValue, tokens[parseIndex][2]];
@@ -351,7 +336,6 @@ function parseType() {
 	tree.addNode("Type", "branch");
 	if (typeKeywords.indexOf(currentTokenValue) > -1) {
 		tree.addNode(currentTokenValue, "leaf");
-		tree.endChildren();
 		match();
 	} else {
 		parseErrors = ["type keyword", currentTokenValue, tokens[parseIndex][2]];
@@ -363,7 +347,6 @@ function parseChar() {
 	tree.addNode("Char", "branch");
 	if (chars.indexOf(currentTokenValue) > -1) {
 		tree.addNode(currentTokenValue, "leaf");
-		tree.endChildren();
 		match();
 	} else {
 		parseErrors = ["Id", currentTokenValue, tokens[parseIndex][2]];
@@ -374,7 +357,6 @@ function parseChar() {
 function parseSpace() {
 	tree.addNode("Space", "branch");
 	tree.addNode('" "', "leaf");
-	tree.endChildren();
 	match();
 }
 
@@ -383,7 +365,6 @@ function parseDigit() {
 	tree.addNode("Digit", "branch");
 	if (digits.indexOf(currentTokenValue) > -1) {
 		tree.addNode(currentTokenValue, "leaf");
-		tree.endChildren();
 		match();
 	} else {
 		parseErrors= ["digit", currentTokenValue, tokens[parseIndex][2]];
@@ -395,7 +376,6 @@ function parseBoolop() {
 	tree.addNode("Boolop", "branch");
 	if (currentTokenValue === "==" || currentTokenValue === "!=") {
 		tree.addNode(currentTokenValue, "leaf");
-		tree.endChildren();
 		match();
 	} else {
 		parseErrors = ["Boolop", currentTokenValue, tokens[parseIndex][2]];
@@ -408,7 +388,6 @@ function parseBoolVal() {
 	tree.addNode("Boolval", "branch");
 	if (currentTokenValue === "false" || currentTokenValue === "true") {
 		tree.addNode(currentTokenValue, "leaf");
-		tree.endChildren();
 		match();
 	} else {
 		parseErrors = ["boolval", currentTokenValue, tokens[parseIndex][2]];
@@ -419,7 +398,6 @@ function parseBoolVal() {
 function parseIntOp() {
 	tree.addNode("intop", "branch");
 	tree.addNode("+", "leaf");
-	tree.endChildren();
 	match();
 }
 
