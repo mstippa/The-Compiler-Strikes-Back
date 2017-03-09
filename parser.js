@@ -16,12 +16,17 @@ function match() {
 	parseIndex++;
 	if (parseIndex < tokens.length) {
 		currentTokenValue = tokens[parseIndex][1];
+	} else {
+		parseIndex--;
 	}	
 }
 
 function parse () {
 	currentTokenValue = tokens[parseIndex][1];
+	errorCounter = 0;
+	tree = new Tree();
 	parseProgram();
+	tree.endChildren();
 	displayParseOutcome();
 }
 
@@ -35,7 +40,7 @@ function parseProgram() {
 			parseErrors = ["$", currentTokenValue];
 		} else {
 			tree.addNode("$", "leaf");
-			tree.endChildren();
+			match();
 		}
 	} else {
 		// do nothing
@@ -52,6 +57,7 @@ function parseBlock() {
 			if (tokens[parseIndex][1] === "}") {
 				tree.addNode("StatementList", "branch");
 				tree.addNode("","leaf");
+				tree.endChildren();
 				tree.addNode("}", "leaf");
 				match();
 			} else {
@@ -108,8 +114,6 @@ function parseStatement() {
 		parseWhileStatement();
 		tree.endChildren();
 	} else if (currentTokenValue === "if") {
-		tree.addNode("IfStatement", "branch");
-		match();
 		parseIfStatement();
 		tree.endChildren();
 	} else if (currentTokenValue === "{") {
@@ -185,7 +189,7 @@ function parseWhileStatement() {
 
 
 function parseIfStatement() {
-	tree.addNode("IfExpr", "branch");
+	tree.addNode("IfStatement", "branch");
 	tree.addNode("if", "leaf");
 	match();
 	parseBooleanExpr();
@@ -200,7 +204,7 @@ function parseIfStatement() {
 
 
 function parseExpr() {
-	tree.addNode("ParseExpr", "branch");
+	tree.addNode("Expr", "branch");
 	if (digits.indexOf(currentTokenValue) > -1) {
 		parseIntExpr();
 		tree.endChildren();
@@ -214,7 +218,7 @@ function parseExpr() {
 		parseId();
 		tree.endChildren();
 	} else {
-		parseErrors = ["ParseExpr", currentTokenValue, tokens[parseIndex][2]];
+		parseErrors = ["Expr", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 

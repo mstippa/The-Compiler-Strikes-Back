@@ -19,6 +19,7 @@ var input = "";
 var tokenName = "";
 var lineCounter = 1;
 var quoteCounter = 0;
+var programCounter = 0; // keeps track of the number of programs
 
 
 // scans through the input looking for valid tokens
@@ -200,8 +201,7 @@ function identifyInvalidLexeme() {
 // this displays the tokens
 function displayTokens() {
 	var index = 0; // local index
-	var errorCounter = 0; // keeps track of the number of errors for each program 
-	var programCounter = 0; // keeps track of the number of programs 
+	var errorCounter = 0; // keeps track of the number of errors for each program  
 	while (index < tokens.length) {
 		// tests if there is a row in tokens that is undefined and it will be skipped over in that case
 		if (tokens[index] === undefined) {
@@ -245,10 +245,10 @@ function displayTokens() {
 			index++;
 		// tests to see if the token value in the last array of tokens is an end of the file token	
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
+			programCounter++;
 			tokens[index] = ["token_eof","$", lineCounter, programCounter];
 			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>'; // displays a warning message
 			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
-			programCounter++;
 			index++;
 		}	
 
