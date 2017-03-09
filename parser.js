@@ -14,7 +14,9 @@ var tree = new Tree();
 
 function match() {
 	parseIndex++;
-	currentTokenValue = tokens[parseIndex][1];
+	if (parseIndex < tokens.length) {
+		currentTokenValue = tokens[parseIndex][1];
+	}	
 }
 
 function parse () {
@@ -26,53 +28,56 @@ function parse () {
 
 function parseProgram() {
 	tree.addNode("Program", "branch");
-	parseBlock(); 
-	if (currentTokenValue !== "$") {
-		parseErrors[errorCounter] = ["$", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
-		document.getElementById("output").innerHTML += '<p>Parse error on line  '+tokens[parseIndex][2]+'. Expecting "$" but got '+tokens[parseIndex+1][1]+'</p>';
+	parseBlock();
+	tree.endChildren();
+	if (!parseErrors.length > 0) {
+		if (currentTokenValue !== "$") {
+			parseErrors = ["$", currentTokenValue];
+		} else {
+			tree.addNode("$", "leaf");
+			tree.endChildren();
+		}
 	} else {
-		tree.addNode("$", "leaf");
-		tree.endChildren();
-		document.getElementById("output").innerHTML += '<p>Parse completed for program   '+tokens[parseIndex][3]+'</p>';
-	}
+		// do nothing
+	}	
 }
 
 
 function parseBlock() {
 	tree.addNode("Block", "branch");
-	if (currentTokenValue === "{" && tokens[parseIndex+1][1] === "}") {
+	if (currentTokenValue === "{") {
 		tree.addNode("{","leaf");
-		tree.endChildren();
 		match();
-		tree.addNode("StatementList", "branch");
-		tree.addNode("","leaf");
-		tree.endChildren();
-		tree.addNode("}", "leaf");
-		tree.endChildren();
-		match();
-	} else if (currentTokenValue === "{") {	
-		tree.addNode("{", "leaf");
-		tree.endChildren();
-		match();
-		parseStatementList();
-		if (currentTokenValue === "}") {
-			tree.addNode("}","leaf");
-			tree.endChildren();
-			match();
+		if (tokens.length > parseIndex) {
+			if (tokens[parseIndex][1] === "}") {
+				tree.addNode("StatementList", "branch");
+				tree.addNode("","leaf");
+				tree.endChildren();
+				tree.addNode("}", "leaf");
+				tree.endChildren();
+				match();
+			} else {
+				parseStatementList();
+				tree.endChildren();
+				if (!parseErrors.length > 0) {
+					if (currentTokenValue === "}") {
+						tree.addNode("}","leaf");
+						tree.endChildren();
+						match();
+					} else {
+						parseErrors = ["}", currentTokenValue, tokens[parseIndex][2]];
+					}
+				} else {
+					// do nothing
+				}	
+			}
 		} else {
-			parseErrors[errorCounter] = ["}", currentTokenValue, tokens[parseIndex][2]];
-			errorCounter++;
-			match();
-		}
+			parseErrors = ["StatementList", currentTokenValue, tokens[parseIndex-1][2]];
+		}	
 	} else {
-		parseErrors[errorCounter] = ["{", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
-	}	
+		parseErrors = ["{", currentTokenValue, tokens[parseIndex][2]];
+	}
 }
-
 
 function parseStatementList() {
 	tree.addNode("StatementList", "branch");
@@ -80,7 +85,13 @@ function parseStatementList() {
 	// do nothing		
 	} else {
 		parseStatement();
-		parseStatementList();
+		tree.endChildren();
+		if (!parseErrors.length > 0) {
+			parseStatementList();
+			tree.endChildren();
+		} else {
+			// do nothing
+		}	
 	}
 }
 
@@ -89,37 +100,54 @@ function parseStatement() {
 	tree.addNode("Statement", "branch");
 	if (currentTokenValue === "print") {
 		parsePrintStatement();
+		tree.endChildren();
 	} else if (chars.indexOf(currentTokenValue) > -1) {
 		parseAssignmentStatement();
+		tree.endChildren();
 	} else if (typeKeywords.indexOf(currentTokenValue) > -1) {
 		parseVarDecl();
+		tree.endChildren();
 	} else if (currentTokenValue === "while") {
 		parseWhileStatement();
+		tree.endChildren();
 	} else if (currentTokenValue === "if") {
 		tree.addNode("IfStatement", "branch");
 		match();
 		parseIfStatement();
+		tree.endChildren();
 	} else if (currentTokenValue === "{") {
 		parseBlock();
+		tree.endChildren();
 	} else {
-		parseErrors[errorCounter] = ["Statement", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		if (currentTokenValue === "$") {
+			// do nothing
+		} else {
+			parseErrors = ["Statement", currentTokenValue, tokens[parseIndex][2]];
+		}	
 	}	
 }
 
 
 function parsePrintStatement() {
 	tree.addNode("PrintStatement", "branch");
+	tree.addNode("print", "leaf");
+	tree.endChildren();
+	match();
 	if (currentTokenValue === "(") {
 		tree.addNode("(", "leaf");
 		tree.endChildren();
 		match();
 		parseExpr();
+		tree.endChildren();
+		if (currentTokenValue === ")") {
+			tree.addNode(")", "leaf");
+			tree.endChildren();
+			match();
+		} else {
+			parseErrors = [")", currentTokenValue, tokens[parseIndex][2]];
+		}
 	} else {
-		parseErrors[errorCounter] = ["(", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["(", currentTokenValue, tokens[parseIndex][2]];
 	}
 }
 
@@ -127,15 +155,15 @@ function parsePrintStatement() {
 function parseAssignmentStatement() {
 	tree.addNode("AssignmentStatement", "branch");
 	parseId();
+	tree.endChildren();
 	if (currentTokenValue === "=") {
 		tree.addNode("=", "leaf");
 		tree.endChildren();
 		match();
 		parseExpr();
+		tree.endChildren();
 	} else {
-		parseErrors[errorCounter] = ["=", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["=", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
@@ -143,7 +171,9 @@ function parseAssignmentStatement() {
 function parseVarDecl() {
 	tree.addNode("VarDecl", "branch");
 	parseType();
+	tree.endChildren();
 	parseId();
+	tree.endChildren();
 }
 
 
@@ -153,7 +183,13 @@ function parseWhileStatement() {
 	tree.endChildren();
 	match();
 	parseBooleanExpr();
-	parseBlock();	
+	tree.endChildren();
+	if (!parseErrors.length > 0) {
+		parseBlock();
+		tree.endChildren();
+	} else {
+		// do nothing
+	}		
 }
 
 
@@ -163,7 +199,13 @@ function parseIfStatement() {
 	tree.endChildren();
 	match();
 	parseBooleanExpr();
-	parseBlock();
+	tree.endChildren();
+	if (!parseErrors.length > 0) {
+		parseBlock();
+		tree.endChildren();
+	} else { 
+		// do nothing
+	}	
 }
 
 
@@ -171,16 +213,18 @@ function parseExpr() {
 	tree.addNode("ParseExpr", "branch");
 	if (digits.indexOf(currentTokenValue) > -1) {
 		parseIntExpr();
+		tree.endChildren();
 	} else if (currentTokenValue === '"') {
 		parseStringExpr();
+		tree.endChildren();
 	} else if (currentTokenValue === "(" || currentTokenValue === "true" || currentTokenValue === "false") {
 		parseBooleanExpr();
+		tree.endChildren();
 	} else if (chars.indexOf(currentTokenValue) > -1) {
 		parseId();
+		tree.endChildren();
 	} else {
-		parseErrors[errorCounter] = ["ParseExpr", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["ParseExpr", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
@@ -191,10 +235,21 @@ function parseIntExpr() {
 	tree.endChildren();
 	match();
 	parseDigit();
-	if (currentTokenValue === "+") {
-		parseIntOp();
-		parseExpr();
-	}
+	tree.endChildren();
+	if (!parseErrors.length > 0) {
+		if (currentTokenValue === "+") {
+			parseIntOp();
+			tree.endChildren();
+			if (!parseErrors.length > 0) {
+				parseExpr();
+				tree.endChildren();
+			} else {
+				// do nothing
+			}	
+		}	
+	} else {
+		// do nothing
+	}		
 }
 
 
@@ -204,15 +259,18 @@ function parseStringExpr() {
 	tree.endChildren();
 	match();
 	parseCharList();
-	if (currentTokenValue === '"') {
-		tree.addNode('"', "leaf");
-		tree.endChildren();
-		match();
+	tree.endChildren();
+	if (!parseErrors.length > 0) {
+		if (currentTokenValue === '"') {
+			tree.addNode('"', "leaf");
+			tree.endChildren();
+			match();
+		} else {
+			parseErrors = ['"', currentTokenValue, tokens[parseIndex][2]];
+		}
 	} else {
-		parseErrors[errorCounter] = ['"', currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
-	}
+		// do nothing
+	}	
 }
 
 
@@ -220,22 +278,36 @@ function parseBooleanExpr() {
 	tree.addNode("BooleanExpr", "branch");
 	if (currentTokenValue === "true" || currentTokenValue === "false") {
 		parseBoolVal();
+		tree.endChildren();
 	} else if (currentTokenValue === "(") {
 		tree.addNode("(", "leaf");
 		tree.endChildren();
 		match();
 		parseExpr();
-		parseBoolop();
-		parseExpr();
-		if (currentTokenValue === ")") {
-			tree.addNode(")", "leaf");
+		tree.endChildren();
+		if (!parseErrors.length > 0) {
+			parseBoolop();
 			tree.endChildren();
-			match();
+			if (!parseErrors.length > 0) {
+				parseExpr();
+				tree.endChildren();
+				if (!parseErrors.length > 0) {
+					if (currentTokenValue === ")") {
+						tree.addNode(")", "leaf");
+						tree.endChildren();
+						match();
+					} else {
+						parseErrors = [")", currentTokenValue, tokens[parseIndex][2]];
+					}
+				} else {
+					// do nothing
+				}	
+			} else {
+				// do nothing
+			}	
 		} else {
-			parseErrors[errorCounter] = [")", currentTokenValue, tokens[parseIndex][2]];
-			errorCounter++;
-			match();
-		}
+			// do nothing
+		}	
 	}
 }
 
@@ -243,6 +315,7 @@ function parseBooleanExpr() {
 function parseId() {
 	tree.addNode("Id", "branch");
 	parseChar();
+	tree.endChildren();
 }
 
 
@@ -250,16 +323,26 @@ function parseCharList() {
 	tree.addNode("CharList", "branch");
 	if (chars.indexOf(currentTokenValue) > -1) {
 		parseChar();
-		parseCharList();
+		tree.endChildren();
+		if (!parseErrors.length > 0) {
+			parseCharList();
+			tree.endChildren();
+		} else {
+			// do nothing
+		}	
 	} else if (currentTokenValue === " ") {	
 		parseSpace();
-		parseCharList();
+		tree.endChildren();
+		if (!parseErrors.length > 0) {
+			parseCharList();
+			tree.endChildren();
+		} else {
+			// do nothing
+		}	
 	} else if (currentTokenValue === '"') {
 		// do nothing
 	} else {
-		parseErrors[errorCounter] = ["space or character", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["space or character", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
@@ -270,11 +353,8 @@ function parseType() {
 		tree.addNode(currentTokenValue, "leaf");
 		tree.endChildren();
 		match();
-		parseId();
 	} else {
-		parseErrors[errorCounter] = ["type keyword", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["type keyword", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
@@ -286,9 +366,7 @@ function parseChar() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["Id", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["Id", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
@@ -308,9 +386,7 @@ function parseDigit() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["digit", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors= ["digit", currentTokenValue, tokens[parseIndex][2]];
 	}
 }
 
@@ -322,9 +398,8 @@ function parseBoolop() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["Boolop", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["Boolop", currentTokenValue, tokens[parseIndex][2]];
+
 	}
 }
 
@@ -336,9 +411,7 @@ function parseBoolVal() {
 		tree.endChildren();
 		match();
 	} else {
-		parseErrors[errorCounter] = ["boolval", currentTokenValue, tokens[parseIndex][2]];
-		errorCounter++;
-		match();
+		parseErrors = ["boolval", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
@@ -387,7 +460,6 @@ function Tree() {
         // If we are an interior/branch node, then...
         if (kind == "branch") {
             // ... update the CURrent node pointer to ourselves.
-            console.log(node.name);
             this.cur = node;
         }
     };
@@ -415,12 +487,11 @@ function Tree() {
             for (var i = 0; i < depth; i++) {
                 traversalResult += "-";
             }
-
             // If there are no children (i.e., leaf nodes)...
             if (!node.children || node.children.length === 0) {
                 // ... note the leaf node.
                 traversalResult += "[" + node.name + "]";
-                console.log(traversalResult);
+                //console.log(traversalResult);
                 traversalResult += "\n";
             } else {
                 // There are children, so note these interior/branch nodes and ...
@@ -435,21 +506,23 @@ function Tree() {
         // Make the initial call to expand from the root.
         expand(this.root, 0);
         // Return the result.
+
+        console.log(traversalResult);
         return traversalResult;
     };
 }
 
 
 function displayParseOutcome() {
-	var i = 0;
 	if (parseErrors.length > 0) {
-		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+tokens[i][3]+'</p>';
-		while (i < parseErrors.length) {
-			document.getElementById("output").innerHTML += '<p>Parse error on line '+errorCounter[i][2]+'. Expecting '+errorCounter[i][0]+' but got '+errorCounter[i][2]+'</p>';
-			i++;
-		}
+		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+tokens[parseIndex-1][3]+'</p>';
+			if (parseErrors[0] === "$") {
+				document.getElementById("output").innerHTML += '<p>Parse error: no end of file token found</p>';
+			} else {
+				document.getElementById("output").innerHTML += '<p>Parse error on line '+parseErrors[2]+'. Expecting '+parseErrors[0]+' but got '+parseErrors[1]+'</p>';
+			}
 	} else {
-		document.getElementById("output").innerHTML += '<p>Parse completed for program '+tokens[i][3]+'</p>';
+		document.getElementById("output").innerHTML += '<p>Parse completed for program '+tokens[parseIndex][3]+'</p>';
 		document.getElementById("tree").innerHTML += tree;
 	}
 }
