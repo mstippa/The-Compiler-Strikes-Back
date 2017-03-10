@@ -39,12 +39,7 @@
 		}
 
 		function parsePrograms() {
-			console.log(lexerErrorCounter);
-			if (lexerErrorCounter === 0) {
 				parse();
-			} else {
-				// do not parse program
-			}
 		}
 
 		// clears output box and resets global variables
@@ -59,6 +54,8 @@
 			quoteCounter = 0;
 			programCounter = 0;
 			lexerErrorCounter = 0;
+			lexFailed = false;
+			startOfProgram = 0;
 			parseIndex = 0;
 			currentTokenValue = "";
 			nextTokenValue = "";

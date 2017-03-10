@@ -15,12 +15,15 @@ var endFile = "$";
 var digits = ["0","1","2","3","4","5","6","7","8","9"];
 var currentToken = "";
 var index = 0; 
+var index = 0;
 var input = "";
 var tokenName = "";
 var lineCounter = 1;
 var quoteCounter = 0;
 var programCounter = 0; // keeps track of the number of programs
 var lexerErrorCounter = 0;
+var lexFailed = false;
+var startOfProgram = 0;
 
 
 // scans through the input looking for valid tokens
@@ -203,7 +206,7 @@ function identifyInvalidLexeme() {
 function displayTokens() {
 	programCounter = 0;
 	lexerErrorCounter = 0;
-	var index = 0; // local index // keeps track of the number of errors for each program  
+	var index = 0;
 	while (index < tokens.length) {
 		// tests if there is a row in tokens that is undefined and it will be skipped over in that case
 		if (tokens[index] === undefined) {
@@ -221,8 +224,13 @@ function displayTokens() {
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>'; // displays the end of file token 
 			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+lexerErrorCounter+' errors</p>'; // displays the program number and number of errors
 			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
-			parsePrograms();
 			index++;
+			if (lexerErrorCounter !== 0) {
+				lexFailed = true;
+				startOfProgram = index;
+			} else {
+				parsePrograms();
+			}
 			lexerErrorCounter = 0;
 		// if here then display the other tokens
 		} else if (tokens[index][0] === "\n") {

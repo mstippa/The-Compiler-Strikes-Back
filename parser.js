@@ -24,7 +24,13 @@ function match() {
 
 // starts the derivation of the source code
 function parse () {
-	currentTokenValue = tokens[parseIndex][1]; // sets currentTokenValue equal to the value at the current index in tokens
+	if (lexFailed === false) {
+		currentTokenValue = tokens[parseIndex][1]; // sets currentTokenValue equal to the value at the current index in tokens
+	} else {
+		parseIndex = startOfProgram
+		currentTokenValue = tokens[parseIndex][1];
+
+	}	
 	errorCounter = 0;
 	tree = new Tree(); // creates a new tree object
 	parseProgram();
@@ -567,7 +573,7 @@ function Tree() {
 // displays the outcome of the parse
 function displayParseOutcome() {
 	if (parseErrors.length > 0) {
-		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+tokens[parseIndex-1][3]+'</p>';
+		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+programCounter+'</p>';
 			if (parseErrors[0] === "$") {
 				document.getElementById("output").innerHTML += '<p>Parse error: no end of file token found</p>';
 				document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
@@ -576,8 +582,9 @@ function displayParseOutcome() {
 				document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
 			}
 	} else {
-		document.getElementById("output").innerHTML += '<p>Parse completed for program '+tokens[parseIndex][3]+'</p>';
-		document.getElementById("tree").innerHTML += 'Program '+tokens[parseIndex][3]+' tree\n';
+		document.getElementById("output").innerHTML += '<p>Parse completed for program '+programCounter+'</p>';
+		document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
+		document.getElementById("tree").innerHTML += 'Program '+programCounter+' tree\n';
 		document.getElementById("tree").innerHTML += tree;
 		document.getElementById("tree").innerHTML += '------------------------------------\n';
 	}
