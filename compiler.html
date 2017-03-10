@@ -36,14 +36,14 @@
 			input = input.replace(/^\s+|\s+$/g, ""); // this removes the leading and trailing spaces
 			findTokens();
 			displayTokens();
-			parsePrograms();
 		}
 
 		function parsePrograms() {
-			var i = 0;
-			while (i < programCounter) {
+			console.log(lexerErrorCounter);
+			if (lexerErrorCounter === 0) {
 				parse();
-				i++;
+			} else {
+				// do not parse program
 			}
 		}
 
@@ -58,6 +58,7 @@
 			tokens = [];
 			quoteCounter = 0;
 			programCounter = 0;
+			lexerErrorCounter = 0;
 			parseIndex = 0;
 			currentTokenValue = "";
 			nextTokenValue = "";

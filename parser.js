@@ -30,6 +30,10 @@ function parse () {
 	parseProgram();
 	tree.endChildren();
 	displayParseOutcome();
+	if (currentTokenValue === "$" && tokens[parseIndex+1] !== undefined) {
+		parseIndex++;
+		parseErrors = [];
+	}
 }
 
 // program production
@@ -77,6 +81,7 @@ function parseBlock() {
 						match();
 					} else {
 						parseErrors = ["}", currentTokenValue, tokens[parseIndex][2]];
+						match();
 					}
 				} else {
 					// do nothing, but we're really exiting function because error has been found
@@ -88,6 +93,7 @@ function parseBlock() {
 	// if here then we did not get a {		
 	} else {
 		parseErrors = ["{", currentTokenValue, tokens[parseIndex][2]];
+		match();
 	}
 }
 
@@ -138,7 +144,8 @@ function parseStatement() {
 		tree.endChildren();
 	// if here then a statement has not been found	
 	} else {
-		parseErrors = ["Statement", currentTokenValue, tokens[parseIndex][2]];	
+		parseErrors = ["Statement", currentTokenValue, tokens[parseIndex][2]];
+		match();	
 	}	
 }
 
@@ -161,10 +168,12 @@ function parsePrintStatement() {
 		// no closing paren	
 		} else {
 			parseErrors = [")", currentTokenValue, tokens[parseIndex][2]];
+			match();
 		}
 	// no paren after the print keyword	
 	} else {
 		parseErrors = ["(", currentTokenValue, tokens[parseIndex][2]];
+		match();
 	}
 }
 
@@ -182,6 +191,7 @@ function parseAssignmentStatement() {
 	// no "=" was found	
 	} else {
 		parseErrors = ["=", currentTokenValue, tokens[parseIndex][2]];
+		match();
 	}	
 }
 
@@ -560,8 +570,10 @@ function displayParseOutcome() {
 		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+tokens[parseIndex-1][3]+'</p>';
 			if (parseErrors[0] === "$") {
 				document.getElementById("output").innerHTML += '<p>Parse error: no end of file token found</p>';
+				document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
 			} else {
 				document.getElementById("output").innerHTML += '<p>Parse error on line '+parseErrors[2]+'. Expecting '+parseErrors[0]+' but got '+parseErrors[1]+'</p>';
+				document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
 			}
 	} else {
 		document.getElementById("output").innerHTML += '<p>Parse completed for program '+tokens[parseIndex][3]+'</p>';

@@ -20,6 +20,7 @@ var tokenName = "";
 var lineCounter = 1;
 var quoteCounter = 0;
 var programCounter = 0; // keeps track of the number of programs
+var lexerErrorCounter = 0;
 
 
 // scans through the input looking for valid tokens
@@ -200,44 +201,45 @@ function identifyInvalidLexeme() {
 
 // this displays the tokens
 function displayTokens() {
-	var index = 0; // local index
-	var errorCounter = 0; // keeps track of the number of errors for each program  
+	programCounter = 0;
+	lexerErrorCounter = 0;
+	var index = 0; // local index // keeps track of the number of errors for each program  
 	while (index < tokens.length) {
 		// tests if there is a row in tokens that is undefined and it will be skipped over in that case
 		if (tokens[index] === undefined) {
 			tokens.splice(index,1);
 		} else if (tokens[index][1] === "invalid lexeme" && tokens[index][0] === "") {
-			console.log("shit");
 		// tests if token value in the value column of the tokens array is an invalid lexeme	
 		} else if (tokens[index][1] === "invalid lexeme") {
 			document.getElementById("output").innerHTML += '<p>Error, invalid Lexeme: '+tokens[index][0]+' at line '+tokens[index][2]+'</p>'; // displays the invalid lexem value and where it was found
-			errorCounter++;
+			lexerErrorCounter++;
 			tokens.splice(index, 1);
 		// tests if token value in the value column of the tokens array is an end of file token
 		} else if (tokens[index][1] === "$") {
 			programCounter++; // update the program counter
 			tokens[index][3] = programCounter; // add the program number as an attribute to the end of program token
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>'; // displays the end of file token 
-			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+errorCounter+' errors</p>'; // displays the program number and number of errors
+			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+lexerErrorCounter+' errors</p>'; // displays the program number and number of errors
 			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
+			parsePrograms();
 			index++;
-			errorCounter = 0;
+			lexerErrorCounter = 0;
 		// if here then display the other tokens
 		} else if (tokens[index][0] === "\n") {
 			document.getElementById("output").innerHTML += '<p>Error: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
-			errorCounter++;
+			lexerErrorCounter++;
 			tokens.splice(index, 1);
 		} else if (tokens[index][0] === "string_end_file") {
 			document.getElementById("output").innerHTML += '<p>Error: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
-			errorCounter++;
+			lexerErrorCounter++;
 			tokens.splice(index, 1);
 		} else if (tokens[index][0] === "invalid string") {
 			document.getElementById("output").innerHTML += '<p>'+tokens[index][1]+' is not a valid string at line '+tokens[index][2]+'</p>';	
-			errorCounter++;
+			lexerErrorCounter++;
 			tokens.splice(index, 1);
 		} else if (tokens[index][0] === "missing quote") {
 			document.getElementById("output").innerHTML += '<p>Error, program '+programCounter+' is missing quotes</p>';
-			errorCounter++;
+			lexerErrorCounter++;
 			tokens.splice(index, 1);
 		} else {
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+' at line '+tokens[index][2]+'</p>';
@@ -247,9 +249,11 @@ function displayTokens() {
 		} if (tokens[tokens.length-1][1] !==  "$" && index === tokens.length) {
 			programCounter++;
 			tokens[index] = ["token_eof","$", lineCounter, programCounter];
-			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+errorCounter+' errors</p>'; // displays a warning message
+			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+lexerErrorCounter+' errors</p>'; // displays a warning message
 			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
+			parsePrograms();
 			index++;
+			lexerErrorCounter = 0;
 		}	
 
 	}
