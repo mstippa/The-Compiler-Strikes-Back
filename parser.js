@@ -156,6 +156,7 @@ function parsePrintStatement() {
 		// needs to be clothing paren after Expr has been called
 		if (currentTokenValue === ")") {
 			tree.addNode(")", "leaf");
+			tree.endChildren();
 			match();
 		// no closing paren	
 		} else {
@@ -353,9 +354,9 @@ function parseId() {
 
 // Charlist production
 function parseCharList() {
-	tree.addNode("CharList", "branch");
 	// found a char production
 	if (chars.indexOf(currentTokenValue) > -1) {
+		tree.addNode("CharList", "branch");
 		parseChar();
 		tree.endChildren();
 		if (!parseErrors.length > 0) {
@@ -366,6 +367,7 @@ function parseCharList() {
 		}	
 	// found a space production	
 	} else if (currentTokenValue === " ") {	
+		tree.addNode("CharList", "branch");
 		parseSpace();
 		tree.endChildren();
 		if (!parseErrors.length > 0) {
@@ -375,9 +377,9 @@ function parseCharList() {
 		} else {
 			// do nothing
 		}
-	// " found, add empty list as a node	
+	// " empty list	
 	} else if (currentTokenValue === '"') {
-		tree.addNode(" ", "leaf");
+		tree.addNode("CharList", "branch");
 	// did not find a space or character or empty list	
 	} else {
 		parseErrors = ["space or character", currentTokenValue, tokens[parseIndex][2]];
