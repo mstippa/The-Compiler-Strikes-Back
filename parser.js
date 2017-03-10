@@ -62,9 +62,9 @@ function parseBlock() {
 			// checking if statementList is equal to the empty set
 			if (currentTokenValue === "}") {
 				tree.addNode("StatementList", "branch"); // create a Statementlist branch node
-				tree.addNode("","leaf"); // create a empty string leaf node
 				tree.endChildren();
 				tree.addNode("}", "leaf");
+				tree.endChildren();
 				match();
 			// if statementList is not the empty set	
 			} else {
@@ -72,8 +72,6 @@ function parseBlock() {
 				if (!parseErrors.length > 0) {
 					// if here then } should be the current token 
 					if (currentTokenValue === "}") {
-						tree.addNode("","leaf");
-						tree.endChildren();
 						tree.addNode("}","leaf");
 						tree.endChildren();
 						match();
@@ -95,17 +93,15 @@ function parseBlock() {
 
 // StatementList production
 function parseStatementList() {
-	tree.addNode("StatementList", "branch");
-	console.log(currentTokenValue);
 	if (currentTokenValue === "}" || currentTokenValue === null) {
 	// do nothing!!		
 	} else {
+		tree.addNode("StatementList", "branch");
 		parseStatement();
 		tree.endChildren();
 		// if there are no errors
 		if (!parseErrors.length > 0) {
 			parseStatementList();
-			tree.endChildren();
 		// error has been found	
 		} else {
 			// do nothing
