@@ -11,7 +11,8 @@ var parseErrors = [];
 var errorCounter = 0;
 var tree = new Tree();
 
-
+// updates the parseIndex
+// moves the "pointer" ahead
 function match() {
 	parseIndex++;
 	if (parseIndex < tokens.length) {
@@ -21,215 +22,250 @@ function match() {
 	}	
 }
 
+// starts the derivation of the source code
 function parse () {
-	currentTokenValue = tokens[parseIndex][1];
+	currentTokenValue = tokens[parseIndex][1]; // sets currentTokenValue equal to the value at the current index in tokens
 	errorCounter = 0;
-	tree = new Tree();
+	tree = new Tree(); // creates a new tree object
 	parseProgram();
 	tree.endChildren();
 	displayParseOutcome();
 }
 
-
+// program production
 function parseProgram() {
-	tree.addNode("Program", "branch");
+	tree.addNode("Program", "branch"); // create a Program branch node
 	parseBlock();
-	tree.endChildren();
+	tree.endChildren(); // end the children aka we're done with this branch of the tree
+	// if error was found then don't continue with the parse
 	if (!parseErrors.length > 0) {
+		// if end of file token was not found at this point in the parse then that's an error!
 		if (currentTokenValue !== "$") {
 			parseErrors = ["$", currentTokenValue];
 		} else {
-			tree.addNode("$", "leaf");
-			match();
+			tree.addNode("$", "leaf"); // create a end of file leaf node
+			match(); //update the currentTokenValue
 		}
 	} else {
 		// do nothing
 	}	
 }
 
-
+// block production
 function parseBlock() {
-	tree.addNode("Block", "branch");
+	tree.addNode("Block", "branch"); //create a Block branch node
 	if (currentTokenValue === "{") {
-		tree.addNode("{","leaf");
+		tree.addNode("{","leaf"); // create a { leaf node
 		match();
+		// checking for null pointer exception
 		if (tokens.length > parseIndex) {
-			if (tokens[parseIndex][1] === "}") {
-				tree.addNode("StatementList", "branch");
-				tree.addNode("","leaf");
+			// checking if statementList is equal to the empty set
+			if (currentTokenValue === "}") {
+				tree.addNode("StatementList", "branch"); // create a Statementlist branch node
+				tree.addNode("","leaf"); // create a empty string leaf node
 				tree.endChildren();
 				tree.addNode("}", "leaf");
 				match();
+			// if statementList is not the empty set	
 			} else {
 				parseStatementList();
-				tree.endChildren();
 				if (!parseErrors.length > 0) {
+					// if here then } should be the current token 
 					if (currentTokenValue === "}") {
+						tree.addNode("","leaf");
+						tree.endChildren();
 						tree.addNode("}","leaf");
+						tree.endChildren();
 						match();
 					} else {
 						parseErrors = ["}", currentTokenValue, tokens[parseIndex][2]];
 					}
 				} else {
-					// do nothing
+					// do nothing, but we're really exiting function because error has been found
 				}	
 			}
 		} else {
 			parseErrors = ["StatementList", currentTokenValue, tokens[parseIndex-1][2]];
-		}	
+		}
+	// if here then we did not get a {		
 	} else {
 		parseErrors = ["{", currentTokenValue, tokens[parseIndex][2]];
 	}
 }
 
+// StatementList production
 function parseStatementList() {
 	tree.addNode("StatementList", "branch");
+	console.log(currentTokenValue);
 	if (currentTokenValue === "}" || currentTokenValue === null) {
-	// do nothing		
+	// do nothing!!		
 	} else {
 		parseStatement();
 		tree.endChildren();
+		// if there are no errors
 		if (!parseErrors.length > 0) {
 			parseStatementList();
 			tree.endChildren();
+		// error has been found	
 		} else {
 			// do nothing
 		}	
 	}
 }
 
-
+// Statement production
 function parseStatement() {
 	tree.addNode("Statement", "branch");
+	// printStatement production has been found
 	if (currentTokenValue === "print") {
 		parsePrintStatement();
 		tree.endChildren();
+	// assignmentStatement production has been found	
 	} else if (chars.indexOf(currentTokenValue) > -1) {
 		parseAssignmentStatement();
 		tree.endChildren();
+	// varDecl production has been found	
 	} else if (typeKeywords.indexOf(currentTokenValue) > -1) {
 		parseVarDecl();
 		tree.endChildren();
+	// whileStatement production has been found	
 	} else if (currentTokenValue === "while") {
 		parseWhileStatement();
 		tree.endChildren();
+	// ifStatement production has been found	
 	} else if (currentTokenValue === "if") {
 		parseIfStatement();
 		tree.endChildren();
+	// 	Block production has been found
 	} else if (currentTokenValue === "{") {
 		parseBlock();
 		tree.endChildren();
+	// if here then a statement has not been found	
 	} else {
-		if (currentTokenValue === "$") {
-			// do nothing
-		} else {
-			parseErrors = ["Statement", currentTokenValue, tokens[parseIndex][2]];
-		}	
+		parseErrors = ["Statement", currentTokenValue, tokens[parseIndex][2]];	
 	}	
 }
 
-
+// PrintStatement production
 function parsePrintStatement() {
 	tree.addNode("PrintStatement", "branch");
 	tree.addNode("print", "leaf");
 	match();
+	// if here than "(" is expected
 	if (currentTokenValue === "(") {
 		tree.addNode("(", "leaf");
 		match();
 		parseExpr();
 		tree.endChildren();
+		// needs to be clothing paren after Expr has been called
 		if (currentTokenValue === ")") {
 			tree.addNode(")", "leaf");
 			match();
+		// no closing paren	
 		} else {
 			parseErrors = [")", currentTokenValue, tokens[parseIndex][2]];
 		}
+	// no paren after the print keyword	
 	} else {
 		parseErrors = ["(", currentTokenValue, tokens[parseIndex][2]];
 	}
 }
 
-
+// AssignmentStatement Production
 function parseAssignmentStatement() {
 	tree.addNode("AssignmentStatement", "branch");
 	parseId();
 	tree.endChildren();
+	// "=" is expected after an id
 	if (currentTokenValue === "=") {
 		tree.addNode("=", "leaf");
 		match();
 		parseExpr();
+		tree.endChildren();
+	// no "=" was found	
 	} else {
 		parseErrors = ["=", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
-
+// varDecl production
 function parseVarDecl() {
 	tree.addNode("VarDecl", "branch");
-	parseType();
+	parseType(); // will check in type production if keyword is current token
 	tree.endChildren();
-	parseId();
+	parseId(); // will check in id production if char is current token
 	tree.endChildren();
 }
 
-
+// WhileStatement production
 function parseWhileStatement() {
 	tree.addNode("WhileStatement", "branch");
 	tree.addNode("while", "leaf");
 	match();
-	parseBooleanExpr();
+	parseBooleanExpr(); // booleanexpr is expected after while keyword
 	tree.endChildren();
+	// making sure there are no errors
 	if (!parseErrors.length > 0) {
 		parseBlock();
 		tree.endChildren();
+	// send it back!!!	
 	} else {
 		// do nothing
 	}		
 }
 
-
+// IfStatement production
 function parseIfStatement() {
 	tree.addNode("IfStatement", "branch");
 	tree.addNode("if", "leaf");
 	match();
-	parseBooleanExpr();
+	parseBooleanExpr(); // booleanexpr is expected after if keyword
 	tree.endChildren();
+	// checking for no errors
 	if (!parseErrors.length > 0) {
 		parseBlock();
 		tree.endChildren();
+	// if there are errors, send it back!!	
 	} else { 
 		// do nothing
 	}	
 }
 
-
+// Expr production
 function parseExpr() {
 	tree.addNode("Expr", "branch");
+	// intexpr production has been found
 	if (digits.indexOf(currentTokenValue) > -1) {
 		parseIntExpr();
 		tree.endChildren();
+	// stringexpr production has been found
 	} else if (currentTokenValue === '"') {
 		parseStringExpr();
 		tree.endChildren();
+	// booleanexpr production has been found	
 	} else if (currentTokenValue === "(" || currentTokenValue === "true" || currentTokenValue === "false") {
 		parseBooleanExpr();
 		tree.endChildren();
+	// id production has been found	
 	} else if (chars.indexOf(currentTokenValue) > -1) {
 		parseId();
 		tree.endChildren();
+	// error!! Expecting expr but got something else	
 	} else {
 		parseErrors = ["Expr", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
-
+// IntExpr production
 function parseIntExpr() {
 	tree.addNode("IntExpr", "branch");
 	tree.addNode(currentTokenValue, "leaf");
 	match();
-	parseDigit();
+	parseDigit(); // expecting a digit at this point
 	tree.endChildren();
+	// just making sure there are no errors
 	if (!parseErrors.length > 0) {
+		// expecting a intop
 		if (currentTokenValue === "+") {
 			parseIntOp();
 			tree.endChildren();
@@ -238,38 +274,48 @@ function parseIntExpr() {
 				tree.endChildren();
 			} else {
 				// do nothing
-			}	
+			}
+		// "+" was not the current token		
+		} else {
+			parseErrors = ["+", currentTokenValue, tokens[parseIndex][2]];
 		}	
+	// there is an error, send it back!!!
 	} else {
 		// do nothing
 	}		
 }
 
-
+// StringExpr production
 function parseStringExpr() {
 	tree.addNode("StringExpr", "branch");
 	tree.addNode('"', "leaf");
 	match();
-	parseCharList();
+	parseCharList(); // looking for charlist
 	tree.endChildren();
+	// if there are no errors
 	if (!parseErrors.length > 0) {
+		// expecting a "
 		if (currentTokenValue === '"') {
 			tree.addNode('"', "leaf");
 			match();
+		// didn't get a "	
 		} else {
 			parseErrors = ['"', currentTokenValue, tokens[parseIndex][2]];
 		}
+	// error was found	
 	} else {
 		// do nothing
 	}	
 }
 
-
+// BooleanExpr production
 function parseBooleanExpr() {
 	tree.addNode("BooleanExpr", "branch");
+	// found a boolval production
 	if (currentTokenValue === "true" || currentTokenValue === "false") {
 		parseBoolVal();
 		tree.endChildren();
+	// found a paren	
 	} else if (currentTokenValue === "(") {
 		tree.addNode("(", "leaf");
 		match();
@@ -288,28 +334,32 @@ function parseBooleanExpr() {
 					} else {
 						parseErrors = [")", currentTokenValue, tokens[parseIndex][2]];
 					}
+				// error was found kick back	
 				} else {
 					// do nothing
-				}	
+				}
+			// error was found kick back		
 			} else {
 				// do nothing
-			}	
+			}
+		// error was found kick back		
 		} else {
 			// do nothing
 		}	
 	}
 }
 
-
+// Id production
 function parseId() {
 	tree.addNode("Id", "branch");
 	parseChar();
 	tree.endChildren();
 }
 
-
+// Charlist production
 function parseCharList() {
 	tree.addNode("CharList", "branch");
+	// found a char production
 	if (chars.indexOf(currentTokenValue) > -1) {
 		parseChar();
 		tree.endChildren();
@@ -319,54 +369,63 @@ function parseCharList() {
 		} else {
 			// do nothing
 		}	
+	// found a space production	
 	} else if (currentTokenValue === " ") {	
 		parseSpace();
 		tree.endChildren();
 		if (!parseErrors.length > 0) {
 			parseCharList();
 			tree.endChildren();
+		// error was found kick back	
 		} else {
 			// do nothing
-		}	
+		}
+	// " found, add empty list as a node	
 	} else if (currentTokenValue === '"') {
-		// do nothing
+		tree.addNode(" ", "leaf");
+	// did not find a space or character or empty list	
 	} else {
 		parseErrors = ["space or character", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
-
+// parseType production
 function parseType() {
 	tree.addNode("Type", "branch");
+	// expecting a keyword
 	if (typeKeywords.indexOf(currentTokenValue) > -1) {
 		tree.addNode(currentTokenValue, "leaf");
 		match();
+	// keyword was not found	
 	} else {
 		parseErrors = ["type keyword", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
-
+// Char production
 function parseChar() {
 	tree.addNode("Char", "branch");
+	// expecting a char
 	if (chars.indexOf(currentTokenValue) > -1) {
 		tree.addNode(currentTokenValue, "leaf");
 		match();
+	// char was not found	
 	} else {
 		parseErrors = ["Id", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
-
+// space production
 function parseSpace() {
 	tree.addNode("Space", "branch");
 	tree.addNode('" "', "leaf");
 	match();
 }
 
-
+// Digit production
 function parseDigit() {
 	tree.addNode("Digit", "branch");
+	// expecting a digit
 	if (digits.indexOf(currentTokenValue) > -1) {
 		tree.addNode(currentTokenValue, "leaf");
 		match();
@@ -375,37 +434,42 @@ function parseDigit() {
 	}
 }
 
-
+// Boolop production 
 function parseBoolop() {
 	tree.addNode("Boolop", "branch");
+	// expecting a boolop
 	if (currentTokenValue === "==" || currentTokenValue === "!=") {
 		tree.addNode(currentTokenValue, "leaf");
 		match();
+	// boolop was not found	
 	} else {
 		parseErrors = ["Boolop", currentTokenValue, tokens[parseIndex][2]];
 
 	}
 }
 
-
+// Boolval production
 function parseBoolVal() {
 	tree.addNode("Boolval", "branch");
+	// expecting a boolval
 	if (currentTokenValue === "false" || currentTokenValue === "true") {
 		tree.addNode(currentTokenValue, "leaf");
 		match();
+	// boolval was not found	
 	} else {
 		parseErrors = ["boolval", currentTokenValue, tokens[parseIndex][2]];
 	}	
 }
 
-
+// IntOp production
 function parseIntOp() {
 	tree.addNode("intop", "branch");
 	tree.addNode("+", "leaf");
 	match();
 }
 
-
+// function was taken from http://labouseur.com/projects/jsTreeDemo/treeDemo.js
+// builds the tree
 function Tree() {
     // ----------
     // Attributes
@@ -473,7 +537,6 @@ function Tree() {
             if (!node.children || node.children.length === 0) {
                 // ... note the leaf node.
                 traversalResult += "[" + node.name + "]";
-                //console.log(traversalResult);
                 traversalResult += "\n";
             } else {
                 // There are children, so note these interior/branch nodes and ...
@@ -494,7 +557,7 @@ function Tree() {
     };
 }
 
-
+// displays the outcome of the parse
 function displayParseOutcome() {
 	if (parseErrors.length > 0) {
 		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+tokens[parseIndex-1][3]+'</p>';
@@ -505,7 +568,9 @@ function displayParseOutcome() {
 			}
 	} else {
 		document.getElementById("output").innerHTML += '<p>Parse completed for program '+tokens[parseIndex][3]+'</p>';
+		document.getElementById("tree").innerHTML += 'Program '+tokens[parseIndex][3]+' tree\n';
 		document.getElementById("tree").innerHTML += tree;
+		document.getElementById("tree").innerHTML += '------------------------------------\n';
 	}
 }
 
