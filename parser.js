@@ -259,8 +259,6 @@ function parseExpr() {
 // IntExpr production
 function parseIntExpr() {
 	tree.addNode("IntExpr", "branch");
-	tree.addNode(currentTokenValue, "leaf");
-	match();
 	parseDigit(); // expecting a digit at this point
 	tree.endChildren();
 	// just making sure there are no errors
@@ -277,7 +275,7 @@ function parseIntExpr() {
 			}
 		// "+" was not the current token		
 		} else {
-			parseErrors = ["+", currentTokenValue, tokens[parseIndex][2]];
+			// parseErrors = ["+", currentTokenValue, tokens[parseIndex][2]];
 		}	
 	// there is an error, send it back!!!
 	} else {
@@ -322,6 +320,7 @@ function parseBooleanExpr() {
 		parseExpr();
 		tree.endChildren();
 		if (!parseErrors.length > 0) {
+			console.log(currentTokenValue);
 			parseBoolop();
 			tree.endChildren();
 			if (!parseErrors.length > 0) {
