@@ -15,7 +15,7 @@ var tree = new Tree();
 // moves the "pointer" ahead
 function match() {
 	parseIndex++;
-	if (parseIndex < tokens.length) {
+	if (parseIndex < tokens.length && tokens[parseIndex] !== undefined) {
 		currentTokenValue = tokens[parseIndex][1];
 	} else {
 		parseIndex--;
@@ -29,7 +29,6 @@ function parse () {
 	} else {
 		parseIndex = startOfProgram
 		currentTokenValue = tokens[parseIndex][1];
-
 	}	
 	errorCounter = 0;
 	tree = new Tree(); // creates a new tree object
@@ -39,6 +38,17 @@ function parse () {
 	if (currentTokenValue === "$" && tokens[parseIndex+1] !== undefined) {
 		parseIndex++;
 		parseErrors = [];
+	} else {
+		var i = parseIndex;
+		while (i < tokens.length) {
+			if (tokens[i][1] === "$") {
+				parseIndex = i+1;
+				parseErrors = [];
+				break;
+			}
+			i++;
+		}
+
 	}
 }
 
