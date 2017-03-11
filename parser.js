@@ -29,7 +29,8 @@ function parse () {
 	} else {
 		parseIndex = startOfProgram
 		currentTokenValue = tokens[parseIndex][1];
-	}	
+	}
+	console.log(currentTokenValue);	
 	errorCounter = 0;
 	tree = new Tree(); // creates a new tree object
 	parseProgram();
@@ -64,7 +65,6 @@ function parseProgram() {
 			parseErrors = ["$", currentTokenValue];
 		} else {
 			tree.addNode("$", "leaf"); // create a end of file leaf node
-			match(); //update the currentTokenValue
 		}
 	} else {
 		// do nothing
@@ -578,7 +578,6 @@ function Tree() {
         expand(this.root, 0);
         // Return the result.
 
-        console.log(traversalResult);
         return traversalResult;
     };
 }
