@@ -18,6 +18,11 @@
 					<a href="#test2" onclick="testCases(2)">Test 2</a>
 					<a href="#test3" onclick="testCases(3)">Test 3</a>
 					<a href="#test4" onclick="testCases(4)">Test 4</a>
+					<a href="#test5" onclick="testCases(5)">Test 5</a>
+					<a href="#test6" onclick="testCases(6)">Test 6</a>
+					<a href="#test7" onclick="testCases(7)">Test 7</a>
+					<a href="#test8" onclick="testCases(8)">Test 8</a>
+					<a href="#test9" onclick="testCases(9)">Test 9</a>
 				</div>
 			</div>	
 		</div>
@@ -97,6 +102,16 @@
 				document.getElementById("sourceCode").value = '{\n   print() boolean a\n)$true false';
 			} else if (test ===4) {
 				document.getElementById("sourceCode").value = '{print("inta")}$\n{"$"}$\n{"two\nlines"}$';
+			} else if (test ===5) {
+				document.getElementById("sourceCode").value = '{while (5 == "hello") }$';
+			} else if (test === 6) {
+				document.getElementById("sourceCode").value = '{print("hello")}$';
+			} else if (test === 7) {
+				document.getElementById("sourceCode").value = '"1"${}$';
+			} else if (test === 8) {
+				document.getElementById("sourceCode").value = '{if {}}${if true{boolean b}}$';
+			} else if (test === 9) {
+				document.getElementById("sourceCode").value = '{{print (5 + 5 + "dawg")}}$';
 			} 
 		}
 	</script>	
