@@ -368,6 +368,8 @@ function parseBooleanExpr() {
 		} else {
 			// do nothing
 		}	
+	} else {
+		parseErrors = ["BooleanExpr", currentTokenValue, tokens[parseIndex][2]];
 	}
 }
 
@@ -375,6 +377,7 @@ function parseBooleanExpr() {
 function parseId() {
 	tree.addNode("Id", "branch");
 	parseChar();
+	tree.endChildren();
 	tree.endChildren();
 }
 
