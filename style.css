@@ -2,8 +2,10 @@ h1 {
 	text-align: center;
 }
 
+
 #body {
 	margin-top: 75px;
+    font-family: 'Merriweather', serif;
 }
 
 .inputOutput {

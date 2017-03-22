@@ -230,6 +230,7 @@ function displayTokens() {
 				startOfProgram = index;
 			} else {
 				parsePrograms();
+				lexFailed = false;
 			}
 			lexerErrorCounter = 0;
 		// if here then display the other tokens
