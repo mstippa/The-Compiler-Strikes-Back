@@ -24,6 +24,7 @@ function match() {
 
 // starts the derivation of the source code
 function parse () {
+	document.getElementById("output").innerHTML += '<p>parse()</p>';
 	if (lexFailed === false) {
 		currentTokenValue = tokens[parseIndex][1]; // sets currentTokenValue equal to the value at the current index in tokens
 	} else {
@@ -55,6 +56,7 @@ function parse () {
 
 // program production
 function parseProgram() {
+	document.getElementById("output").innerHTML += '<p>parseProgram()</p>';
 	tree.addNode("Program", "branch"); // create a Program branch node
 	parseBlock();
 	tree.endChildren(); // end the children aka we're done with this branch of the tree
@@ -73,6 +75,7 @@ function parseProgram() {
 
 // block production
 function parseBlock() {
+	document.getElementById("output").innerHTML += '<p>parseBlock()</p>';
 	tree.addNode("Block", "branch"); //create a Block branch node
 	if (currentTokenValue === "{") {
 		tree.addNode("{","leaf"); // create a { leaf node
@@ -81,6 +84,7 @@ function parseBlock() {
 		if (tokens.length > parseIndex) {
 			// checking if statementList is equal to the empty set
 			if (currentTokenValue === "}") {
+				document.getElementById("output").innerHTML += '<p>parseStatementList()</p>';
 				tree.addNode("StatementList", "branch"); // create a Statementlist branch node
 				tree.endChildren();
 				tree.addNode("}", "leaf");
@@ -118,6 +122,7 @@ function parseStatementList() {
 	if (currentTokenValue === "}" || currentTokenValue === null) {
 	// do nothing!!		
 	} else {
+		document.getElementById("output").innerHTML += '<p>parseStatementList()</p>';
 		tree.addNode("StatementList", "branch");
 		parseStatement();
 		tree.endChildren();
@@ -133,6 +138,7 @@ function parseStatementList() {
 
 // Statement production
 function parseStatement() {
+	document.getElementById("output").innerHTML += '<p>parseStatement()</p>';
 	tree.addNode("Statement", "branch");
 	// printStatement production has been found
 	if (currentTokenValue === "print") {
@@ -167,6 +173,7 @@ function parseStatement() {
 
 // PrintStatement production
 function parsePrintStatement() {
+	document.getElementById("output").innerHTML += '<p>parsePrintStatement()</p>';
 	tree.addNode("PrintStatement", "branch");
 	tree.addNode("print", "leaf");
 	match();
@@ -195,6 +202,7 @@ function parsePrintStatement() {
 
 // AssignmentStatement Production
 function parseAssignmentStatement() {
+	document.getElementById("output").innerHTML += '<p>parseAssignmentStatement()</p>';
 	tree.addNode("AssignmentStatement", "branch");
 	parseId();
 	tree.endChildren();
@@ -213,6 +221,7 @@ function parseAssignmentStatement() {
 
 // varDecl production
 function parseVarDecl() {
+	document.getElementById("output").innerHTML += '<p>parseVarDecl()</p>';
 	tree.addNode("VarDecl", "branch");
 	parseType(); // will check in type production if keyword is current token
 	tree.endChildren();
@@ -222,6 +231,7 @@ function parseVarDecl() {
 
 // WhileStatement production
 function parseWhileStatement() {
+	document.getElementById("output").innerHTML += '<p>parseWhileStatement()</p>';
 	tree.addNode("WhileStatement", "branch");
 	tree.addNode("while", "leaf");
 	match();
@@ -239,6 +249,7 @@ function parseWhileStatement() {
 
 // IfStatement production
 function parseIfStatement() {
+	document.getElementById("output").innerHTML += '<p>parseIfStatement()</p>';
 	tree.addNode("IfStatement", "branch");
 	tree.addNode("if", "leaf");
 	match();
@@ -256,6 +267,7 @@ function parseIfStatement() {
 
 // Expr production
 function parseExpr() {
+	document.getElementById("output").innerHTML += '<p>parseExpr()</p>';
 	tree.addNode("Expr", "branch");
 	// intexpr production has been found
 	if (digits.indexOf(currentTokenValue) > -1) {
@@ -281,6 +293,7 @@ function parseExpr() {
 
 // IntExpr production
 function parseIntExpr() {
+	document.getElementById("output").innerHTML += '<p>parseIntExpr()</p>';
 	tree.addNode("IntExpr", "branch");
 	parseDigit(); // expecting a digit at this point
 	tree.endChildren();
@@ -308,6 +321,7 @@ function parseIntExpr() {
 
 // StringExpr production
 function parseStringExpr() {
+	document.getElementById("output").innerHTML += '<p>parseStringExpr()</p>';
 	tree.addNode("StringExpr", "branch");
 	tree.addNode('"', "leaf");
 	match();
@@ -331,6 +345,7 @@ function parseStringExpr() {
 
 // BooleanExpr production
 function parseBooleanExpr() {
+	document.getElementById("output").innerHTML += '<p>parseBooleanExpr()</p>';
 	tree.addNode("BooleanExpr", "branch");
 	// found a boolval production
 	if (currentTokenValue === "true" || currentTokenValue === "false") {
@@ -375,6 +390,7 @@ function parseBooleanExpr() {
 
 // Id production
 function parseId() {
+	document.getElementById("output").innerHTML += '<p>parseId()</p>';
 	tree.addNode("Id", "branch");
 	parseChar();
 	tree.endChildren();
@@ -385,6 +401,7 @@ function parseId() {
 function parseCharList() {
 	// found a char production
 	if (chars.indexOf(currentTokenValue) > -1) {
+		document.getElementById("output").innerHTML += '<p>parseCharList()</p>';
 		tree.addNode("CharList", "branch");
 		parseChar();
 		tree.endChildren();
@@ -396,6 +413,7 @@ function parseCharList() {
 		}	
 	// found a space production	
 	} else if (currentTokenValue === " ") {	
+		document.getElementById("output").innerHTML += '<p>parseCharList()</p>';
 		tree.addNode("CharList", "branch");
 		parseSpace();
 		tree.endChildren();
@@ -408,6 +426,7 @@ function parseCharList() {
 		}
 	// " empty list	
 	} else if (currentTokenValue === '"') {
+		document.getElementById("output").innerHTML += '<p>parseCharList()</p>';
 		tree.addNode("CharList", "branch");
 	// did not find a space or character or empty list	
 	} else {
@@ -417,6 +436,7 @@ function parseCharList() {
 
 // parseType production
 function parseType() {
+	document.getElementById("output").innerHTML += '<p>parseType()</p>';
 	tree.addNode("Type", "branch");
 	// expecting a keyword
 	if (typeKeywords.indexOf(currentTokenValue) > -1) {
@@ -430,6 +450,7 @@ function parseType() {
 
 // Char production
 function parseChar() {
+	document.getElementById("output").innerHTML += '<p>parseChar()</p>';
 	tree.addNode("Char", "branch");
 	// expecting a char
 	if (chars.indexOf(currentTokenValue) > -1) {
@@ -443,6 +464,7 @@ function parseChar() {
 
 // space production
 function parseSpace() {
+	document.getElementById("output").innerHTML += '<p>parseSpace()</p>';
 	tree.addNode("Space", "branch");
 	tree.addNode('" "', "leaf");
 	match();
@@ -450,6 +472,7 @@ function parseSpace() {
 
 // Digit production
 function parseDigit() {
+	document.getElementById("output").innerHTML += '<p>parseDigit()</p>';
 	tree.addNode("Digit", "branch");
 	// expecting a digit
 	if (digits.indexOf(currentTokenValue) > -1) {
@@ -462,6 +485,7 @@ function parseDigit() {
 
 // Boolop production 
 function parseBoolop() {
+	document.getElementById("output").innerHTML += '<p>parseBoolop()</p>';
 	tree.addNode("Boolop", "branch");
 	// expecting a boolop
 	if (currentTokenValue === "==" || currentTokenValue === "!=") {
@@ -476,6 +500,7 @@ function parseBoolop() {
 
 // Boolval production
 function parseBoolVal() {
+	document.getElementById("output").innerHTML += '<p>parseBoolVal()</p>';
 	tree.addNode("Boolval", "branch");
 	// expecting a boolval
 	if (currentTokenValue === "false" || currentTokenValue === "true") {
@@ -489,6 +514,7 @@ function parseBoolVal() {
 
 // IntOp production
 function parseIntOp() {
+	document.getElementById("output").innerHTML += '<p>parseIntOp()</p>';
 	tree.addNode("intop", "branch");
 	tree.addNode("+", "leaf");
 	match();
@@ -587,7 +613,7 @@ function displayParseOutcome() {
 	if (parseErrors.length > 0) {
 		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+programCounter+'</p>';
 			if (parseErrors[0] === "$") {
-				document.getElementById("output").innerHTML += '<p>Parse error: no end of file token found</p>';
+				document.getElementById("output").innerHTML += '<p>Parse error: expecting end of file token but got '+parseErrors[1]+'</p>';
 				document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
 			} else {
 				document.getElementById("output").innerHTML += '<p>Parse error on line '+parseErrors[2]+'. Expecting '+parseErrors[0]+' but got '+parseErrors[1]+'</p>';

@@ -8,6 +8,7 @@ var tokens = []; // tokens will be stored as arrays in this array
 var specialCharacters = [" ","{","}","(",")",'"',"=","+","$"];
 var specialCharNames = ["space","lbrace", "rbrace","lparen","rparen","quote","equals","intop","eof"];
 var chars = "abcdefghijklmnopqrstuvwxyz";
+var invalidChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 var keywords = ["if", "int","true","false","while","print","string","boolean"];
 var typeKeywords = ["int", "string", "boolean"];
 var possibleKeywords ="";
@@ -148,7 +149,7 @@ function validateString() {
 						tokens[i] = ["string_end_file", "End of file character can't be in a string", lineCounter];
 						index = index + string.length+1;
 						break;
-					} else if ((digits.indexOf(string[j]) > -1 || specialCharacters.indexOf(string[j]) > -1) && string[j] !== '"') {
+					} else if ((digits.indexOf(string[j]) > -1 || specialCharacters.indexOf(string[j]) > -1 || invalidChars.indexOf(string[j]) > -1) && string[j] !== '"') {
 						tokens[i] = ["invalid string", string, lineCounter];
 						index = index + string.length+1;
 						break;	
