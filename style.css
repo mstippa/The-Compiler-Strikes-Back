@@ -2,22 +2,36 @@ h1 {
 	text-align: center;
 }
 
+.row-centered {
+    text-align:center;
+}
+
+.col-centered {
+    display:inline-block;
+    float:none;
+    /* reset the text-align */
+    /*text-align:left;*/
+    /* inline-block space fix */
+    margin-right:-4px;
+}
+
 
 #body {
 	margin-top: 75px;
     font-family: 'Merriweather', serif;
 }
 
-.inputOutput {
+.input {
+    border: 1px solid black;
+    height: 200px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.verboseOutput {
 	border: 1px solid black;
 	height: 400px;
 	overflow-y: auto;
-}
-
-#tree {
-    border: 1px solid black;
-    height: 300px;
-    overflow-y: auto;
 }
 
 .dropbtn {
