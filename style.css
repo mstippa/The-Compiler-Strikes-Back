@@ -17,15 +17,19 @@ h1 {
 
 
 #body {
-	margin-top: 75px;
+	margin-top: 30px;
     font-family: 'Merriweather', serif;
 }
 
 .input {
     border: 1px solid black;
-    height: 200px;
+    height: 300px;
     overflow-y: auto;
-    margin-bottom: 20px;
+}
+
+#lineNums {
+    height: 300px;
+    padding-right: 0px;
 }
 
 .verboseOutput {
