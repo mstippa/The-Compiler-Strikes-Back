@@ -30,26 +30,27 @@ function parse () {
 	if (lexFailed === false) {
 		currentTokenValue = tokens[parseIndex][1]; // sets currentTokenValue equal to the value at the current index in tokens
 	} else {
-		parseIndex = startOfProgram
+		parseIndex = startOfProgram;
+		parseIndex2 = startOfProgram;
 		currentTokenValue = tokens[parseIndex][1];
-	}
-	console.log(currentTokenValue);	
+	}	
 	errorCounter = 0;
 	cstTree = new Tree(); // creates a new cstTree object
 	astTree = new Tree(); // creates a new astTree object
 	parseProgram();
 	cstTree.endChildren();
 	displayParseOutcome();
-	parseIndex2 = parseIndex;
 	parse2(); 
 	if (currentTokenValue === "$" && tokens[parseIndex+1] !== undefined) {
 		parseIndex++;
+		parseIndex2++;
 		parseErrors = [];
 	} else {
 		var i = parseIndex;
 		while (i < tokens.length) {
 			if (tokens[i][1] === "$") {
 				parseIndex = i+1;
+				parseIndex2 = i+1;
 				parseErrors = [];
 				break;
 			}
