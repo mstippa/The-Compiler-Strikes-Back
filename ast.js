@@ -148,7 +148,7 @@ function parseExpr2() {
 
 function parseStringExpr2() {
 	if (currentTokenValue === '"') {
-		astTree.addNode('"'+charlist+'"', "leaf");
+		astTree.addNode(charlist, "leaf");
 		match2();
 	} else if (chars.indexOf(currentTokenValue) > -1 || currentTokenValue === " ") {
 		charlist = charlist + currentTokenValue;
