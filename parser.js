@@ -527,14 +527,14 @@ function parseIntOp() {
 }
 
 // function was taken from http://labouseur.com/projects/jsTreeDemo/cstTreeDemo.js
-// builds the cstTree
+// Using to build the concrete syntax tree and the abstract sytnax tree
 function Tree() {
     // ----------
     // Attributes
     // ----------
     
-    this.root = null;  // Note the NULL root node of this cstTree.
-    this.cur = {};     // Note the EMPTY current node of the cstTree we're building.
+    this.root = null;  // Note the NULL root node of this Tree.
+    this.cur = {};     // Note the EMPTY current node of the Tree we're building.
 
 
     // -- ------- --
@@ -568,7 +568,7 @@ function Tree() {
         }
     };
 
-    // Note that we're done with this branch of the cstTree...
+    // Note that we're done with this branch of the Tree...
     this.endChildren = function() {
         // ... by moving "up" to our parent node (if possible).
         if ((this.cur.parent !== null) && (this.cur.parent.name !== undefined)) {
@@ -579,7 +579,7 @@ function Tree() {
         }
     };
 
-    // Return a string representation of the cstTree.
+    // Return a string representation of the Tree.
     this.toString = function() {
         // Initialize the result string.
         var traversalResult = "";
@@ -587,7 +587,7 @@ function Tree() {
         // Recursive function to handle the expansion of the nodes.
         function expand(node, depth) {
             // Space out based on the current depth so
-            // this looks at least a little cstTree-like.
+            // this looks at least a little Tree-like.
             for (var i = 0; i < depth; i++) {
                 traversalResult += "-";
             }
