@@ -579,7 +579,7 @@ function Tree() {
         }
     };
 
-    // Return a string representation of the Tree.
+    // Return a string representation of the cstTree.
     this.toString = function() {
         // Initialize the result string.
         var traversalResult = "";

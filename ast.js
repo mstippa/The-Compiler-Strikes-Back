@@ -2,8 +2,10 @@
 * This file creates an Abstract Syntax Tree by reparsing the tokens
 */
 
+// global variables 
 var charlist = "";
 var parseIndex2 = 0;
+var scope = 0;
 
 function match2() {
 	parseIndex2++;
@@ -28,7 +30,7 @@ function parse2() {
 }
 
 function parseBlock2() {
-	if (currentTokenValue !== "}" && currentTokenValue !== "$") {
+	if (currentTokenValue !== "$") {
 		if (typeKeywords.indexOf(currentTokenValue) > -1) {
 			parseVarDecl2();
 		} else if (chars.indexOf(currentTokenValue) > -1) {
@@ -42,20 +44,26 @@ function parseBlock2() {
 		} else if (currentTokenValue === "{") {
 			astTree.addNode("Block", "branch");
 			match2();
+			scope++;
+			parseBlock2();
+		} else if (currentTokenValue === "}") {
+			scope--;
+			match2();
+			astTree.endChildren();
 			parseBlock2();
 		}
 		parseBlock2();
-	}	
+	}
 }
 
 
 function parseVarDecl2() {
 	astTree.addNode("VarDecl", "branch");
 	astTree.addNode(currentTokenValue, "leaf");
-	match2();
+	match2(); // the type
 	astTree.addNode(currentTokenValue, "leaf");
 	astTree.endChildren();
-	match2();
+	match2(); // the variable  
 }
 
 
@@ -138,6 +146,7 @@ function parseExpr2() {
 		parseExpr2();
 	} else if (currentTokenValue === "{") {
 		match2();
+		scope++;
 		parseBlock2();
 	} else if (currentTokenValue === ")") {
 		match2();
