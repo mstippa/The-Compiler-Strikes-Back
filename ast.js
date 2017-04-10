@@ -6,6 +6,10 @@
 var charlist = "";
 var parseIndex2 = 0;
 var scope = 0;
+var varDeclCount = 0;
+var assignStatementCount = 0;
+var semanticAnalysisErrors = "";
+var identifiers = [];
 
 function match2() {
 	parseIndex2++;
@@ -70,23 +74,34 @@ function parseVarDecl2() {
 	astTree.addNode(currentTokenValue, "leaf");
 	cell2.innerHTML = currentTokenValue; // add the symbol type to the symbol table
 	match2(); // the type
-	astTree.addNode(currentTokenValue, "leaf");
-	astTree.endChildren();
-	cell1.innerHTML = currentTokenValue; // add the symbol to the symbol table
-	cell3.innerHTML = scope; // add the scope to the symbol table
-	cell4.innerHTML = tokens[parseIndex][2];
-	cell5.innerHTML = programCounter;
-	match2(); // the variable  
+	identifiers.push[currentTokenValue, scope];
+	if (identifiers.indexOf([currentTokenValue, scope]) > -1) {
+		semanticAnalysisErrors = currentTokenValue + " was already declared in scope " + scope;
+	} else {
+		varDeclCount++;
+		astTree.addNode(currentTokenValue, "leaf");
+		astTree.endChildren();
+		cell1.innerHTML = currentTokenValue; // add the symbol to the symbol table
+		cell3.innerHTML = scope; // add the scope to the symbol table
+		cell4.innerHTML = tokens[parseIndex][2];
+		cell5.innerHTML = programCounter;
+		match2(); // the variable
+	}	  
 }
 
 
 function parseAssignmentStatement2() {
-	astTree.addNode("Assign", "branch");
-	astTree.addNode(currentTokenValue, "leaf");
-	match2(); // the char
-	match2(); // the equals
-	parseExpr2();
-	astTree.endChildren();
+	if (assignStatementCount < varDeclCount) {
+		assignStatementCount++;
+		astTree.addNode("Assign", "branch");
+		astTree.addNode(currentTokenValue, "leaf");
+		match2(); // the char
+		match2(); // the equals
+		parseExpr2();
+		astTree.endChildren();
+	} else {
+		semanticAnalysisErrors = currentTokenValue + " was not declared";
+	}	
 }
 
 
@@ -181,6 +196,7 @@ function parseStringExpr2() {
 
 
 function displayParse2Outcome() {
+
 	document.getElementById("atree").innerHTML += 'Program '+programCounter+' Abstract Syntax Tree\n';
 	document.getElementById("atree").innerHTML += astTree;
 	document.getElementById("atree").innerHTML += '------------------------------------\n'; 
