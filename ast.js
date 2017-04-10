@@ -20,6 +20,7 @@ function parse2() {
 	if (parseErrors.length > 0) {
 		// do nothing
 	} else {
+		scope = 0; // initialize scope
 		astTree.addNode("Block", "branch"); // create a Block branch node for the abstract syntax tree
 		match2(); // the {
 		parseBlock2();
@@ -58,11 +59,21 @@ function parseBlock2() {
 
 
 function parseVarDecl2() {
+	var table = document.getElementById("symbolTable");
+	var row = table.insertRow(1);
+	var cell1 = row.insertCell(0);
+	var cell2 = row.insertCell(1);
+	var cell3 = row.insertCell(2);
+	var cell4 = row.insertCell(3);
 	astTree.addNode("VarDecl", "branch");
 	astTree.addNode(currentTokenValue, "leaf");
+	cell2.innerHTML = currentTokenValue; // add the symbol type to the symbol table
 	match2(); // the type
 	astTree.addNode(currentTokenValue, "leaf");
 	astTree.endChildren();
+	cell1.innerHTML = currentTokenValue; // add the symbol to the symbol table
+	cell3.innerHTML = scope; // add the scope to the symbol table
+	cell4.innerHTML = programCounter;
 	match2(); // the variable  
 }
 
@@ -170,5 +181,5 @@ function parseStringExpr2() {
 function displayParse2Outcome() {
 	document.getElementById("atree").innerHTML += 'Program '+programCounter+' Abstract Syntax Tree\n';
 	document.getElementById("atree").innerHTML += astTree;
-	document.getElementById("atree").innerHTML += '------------------------------------\n';
+	document.getElementById("atree").innerHTML += '------------------------------------\n'; 
 }
