@@ -65,6 +65,7 @@ function parseVarDecl2() {
 	var cell2 = row.insertCell(1);
 	var cell3 = row.insertCell(2);
 	var cell4 = row.insertCell(3);
+	var cell5 = row.insertCell(4);
 	astTree.addNode("VarDecl", "branch");
 	astTree.addNode(currentTokenValue, "leaf");
 	cell2.innerHTML = currentTokenValue; // add the symbol type to the symbol table
@@ -73,7 +74,8 @@ function parseVarDecl2() {
 	astTree.endChildren();
 	cell1.innerHTML = currentTokenValue; // add the symbol to the symbol table
 	cell3.innerHTML = scope; // add the scope to the symbol table
-	cell4.innerHTML = programCounter;
+	cell4.innerHTML = tokens[parseIndex][2];
+	cell5.innerHTML = programCounter;
 	match2(); // the variable  
 }
 
