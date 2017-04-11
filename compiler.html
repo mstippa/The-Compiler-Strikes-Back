@@ -98,6 +98,13 @@
 			eofCounter = 0;
 			parseErrors = [];
 			errorCounter = 0;
+			charlist = "";
+			parseIndex2 = 0;
+			scope = 0;
+			varDeclCount = 0;
+			assignStatementCount = 0;
+			semanticAnalysisError = "";
+			identifiers = [];
 			cstTree = new Tree();
 			astTree = new  Tree();
 			document.getElementById("output").innerHTML = "";
