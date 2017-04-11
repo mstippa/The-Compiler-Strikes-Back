@@ -40,10 +40,12 @@ function parse () {
 	parseProgram();
 	cstTree.endChildren();
 	displayParseOutcome();
-	parse2(); 
+	parse2();
+	parse3(); 
 	if (currentTokenValue === "$" && tokens[parseIndex+1] !== undefined) {
 		parseIndex++;
 		parseIndex2++;
+		parseIndex3++;
 		parseErrors = [];
 	} else {
 		var i = parseIndex;
@@ -51,6 +53,7 @@ function parse () {
 			if (tokens[i][1] === "$") {
 				parseIndex = i+1;
 				parseIndex2 = i+1;
+				parseIndex3 = i+1;
 				parseErrors = [];
 				break;
 			}
@@ -620,14 +623,14 @@ function displayParseOutcome() {
 		document.getElementById("output").innerHTML += '<p>Parse not completed for program '+programCounter+'</p>';
 			if (parseErrors[0] === "$") {
 				document.getElementById("output").innerHTML += '<p>Parse error: expecting end of file token but got '+parseErrors[1]+'</p>';
-				document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
+				document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
 			} else {
 				document.getElementById("output").innerHTML += '<p>Parse error on line '+parseErrors[2]+'. Expecting '+parseErrors[0]+' but got '+parseErrors[1]+'</p>';
-				document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
+				document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
 			}
 	} else {
 		document.getElementById("output").innerHTML += '<p>Parse completed for program '+programCounter+'</p>';
-		document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
+		document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
 		document.getElementById("ctree").innerHTML += 'Program '+programCounter+' Concrete Syntax Tree\n';
 		document.getElementById("ctree").innerHTML += cstTree;
 		document.getElementById("ctree").innerHTML += '------------------------------------\n';
