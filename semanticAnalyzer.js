@@ -10,6 +10,7 @@ var assignStatementCount = 0;
 var semanticAnalysisError = "";
 var identifiers = [];
 var warningCounter = 0;
+var semanticAnalysisWarnings = []
 
 function match3() {
 	parseIndex3++;
@@ -98,7 +99,7 @@ function parseVarDecl3() {
 function parseAssignmentSatement3() {
 	if (semanticAnalysisError === "") {
 		if (assignStatementCount >= varDeclCount) {
-			semanticAnalysisError[warningCounter] = currentTokenValue + " was not initialized";
+			semanticAnalysisWarnings[warningCounter] = currentTokenValue + " was not initialized";
 			warningCounter++;
 			typeCheck();
 		}	
@@ -132,6 +133,7 @@ function parsePrintStatement3() {
 	if (semanticAnalysisError === "") {
 		match3(); // the print statement
 		match3(); // the paren
+		typeCheck();
 		parseExpr3();
 	}	
 }
@@ -149,6 +151,7 @@ function parseBooleanExpr3() {
 				}
 				i++;
 			}
+			typeCheck();
 			parseExpr3();
 		} else {
 			// do nothing
@@ -171,6 +174,7 @@ function parseExpr3() {
 				parseExpr3();
 			} else {
 				match3();
+				parseExpr3();
 			}
 		} else if (currentTokenValue === '"') {
 			match3(); // the quote
@@ -210,6 +214,11 @@ function findType (identifier) {
 	} else if (identifier === '"') {
 		return "string";
 	}
+	if (chars.indexOf(currentTokenValue) > -1) {
+		if (identifiers.indexOf(currentTokenValue) < 0) {
+			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
+		}
+	}	
 	while (i < identifiers.length) {
 		if (identifier === identifiers[i]) {
 			if (identifiers[i+1] === scope) {
