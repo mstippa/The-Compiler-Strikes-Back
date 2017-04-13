@@ -92,6 +92,7 @@ function parsePrintStatement2() {
 	match2(); // the print statement
 	match2(); // the paren
 	parseExpr2();
+	match2(); // the paren
 }
 
 function parseBooleanExpr2() {
@@ -130,8 +131,8 @@ function parseExpr2() {
 			parseExpr2();
 		} else {
 			astTree.addNode(currentTokenValue, "leaf");
-			astTree.endChildren();
 			match2(); // the digit
+			parseExpr2();
 		}
 	} else if (currentTokenValue === '"') {
 		match2(); // the quote
@@ -146,7 +147,7 @@ function parseExpr2() {
 		parseBlock2();
 	} else if (currentTokenValue === ")") {
 		match2();
-		tree.endChildren();
+		astTree.endChildren();
 	}
 }
 
