@@ -64,7 +64,7 @@ function parseVarDecl2() {
 
 
 function parseAssignmentStatement2() {
-	astTree.addNode("Assign", "branch");
+	astTree.addNode("Assign", "branch"); 
 	astTree.addNode(currentTokenValue, "leaf");
 	match2(); // the char
 	match2(); // the equals
@@ -131,6 +131,7 @@ function parseExpr2() {
 		} else {
 			astTree.addNode(currentTokenValue, "leaf");
 			astTree.endChildren();
+			match2();
 		}
 	} else if (currentTokenValue === '"') {
 		match2(); // the quote
