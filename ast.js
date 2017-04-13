@@ -56,10 +56,10 @@ function parseBlock2() {
 function parseVarDecl2() {
 	astTree.addNode("VarDecl", "branch");
 	astTree.addNode(currentTokenValue, "leaf");
-	match2();
+	match2(); // the type
 	astTree.addNode(currentTokenValue, "leaf");
 	astTree.endChildren();
-	match2();
+	match2(); // the variable
 }
 
 
@@ -122,7 +122,7 @@ function parseExpr2() {
 			match2(); // the boolop
 			parseExpr2();
 	} else if (digits.indexOf(currentTokenValue) > -1) {
-		if (tokens[parseIndex2+1] === "+") {
+		if (tokens[parseIndex2+1][1] === "+") {
 			astTree.addNode("+", "branch");
 			astTree.addNode(currentTokenValue,  "leaf");
 			match2(); // the digit
@@ -131,7 +131,7 @@ function parseExpr2() {
 		} else {
 			astTree.addNode(currentTokenValue, "leaf");
 			astTree.endChildren();
-			match2();
+			match2(); // the digit
 		}
 	} else if (currentTokenValue === '"') {
 		match2(); // the quote

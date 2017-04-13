@@ -40,6 +40,7 @@ function parse3() {
 function parseBlock3() {
 	if (semanticAnalysisError === "") {
 		if (currentTokenValue !== "$") {
+			console.log(currentTokenValue);
 			if (typeKeywords.indexOf(currentTokenValue) > -1) {
 				parseVarDecl3();
 			} else if (chars.indexOf(currentTokenValue) > -1) {
@@ -163,7 +164,8 @@ function parseExpr3() {
 				match3(); // the boolop
 				parseExpr3();
 		} else if (digits.indexOf(currentTokenValue) > -1) {
-			if (tokens[parseIndex3+1] === "+") {
+			if (tokens[parseIndex3+1][1] === "+") {
+				typeCheck();
 				match3(); // the digit
 				match3(); // the +
 				parseExpr3();
@@ -203,8 +205,13 @@ function findType (identifier) {
 	var i = 1;
 	var identifierType = "";
 	var highestScope = -1;
+	if (digits.indexOf(identifier) > -1) {
+		return "int";
+	} else if (identifier === '"') {
+		return "string";
+	}
 	while (i < identifiers.length) {
-		if (identifier = identifiers[i]) {
+		if (identifier === identifiers[i]) {
 			if (identifiers[i+1] === scope) {
 				return(identifiers[i-1]);
 			} else {
