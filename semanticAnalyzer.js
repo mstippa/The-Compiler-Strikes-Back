@@ -9,6 +9,7 @@ var varDeclCount = 0;
 var assignStatementCount = 0;
 var semanticAnalysisError = "";
 var identifiers = [];
+var warningCounter = 0;
 
 function match3() {
 	parseIndex3++;
@@ -74,6 +75,7 @@ function parseVarDecl3() {
 		var cell4 = row.insertCell(3);
 		var cell5 = row.insertCell(4);
 		cell2.innerHTML = currentTokenValue; // add the symbol type to the symbol table
+		identifiers.push(currentTokenValue);
 		match3(); // the type
 		var scopeCheck = identifiers.indexOf(currentTokenValue);
 		if (scopeCheck > -1 && identifiers[scopeCheck+1] === scope) {
@@ -95,14 +97,16 @@ function parseVarDecl3() {
 function parseAssignmentSatement3() {
 	if (semanticAnalysisError === "") {
 		if (assignStatementCount >= varDeclCount) {
-			semanticAnalysisError = currentTokenValue + " was not declared";
-		} else {	
-			assignStatementCount++;
-			match3(); // the char
-			match3(); // the equals
-			parseExpr3();
+			semanticAnalysisError[warningCounter] = currentTokenValue + " was not initialized";
+			warningCounter++;
+			typeCheck();
+		}	
+		assignStatementCount++;
+		typeCheck();
+		match3(); // the char
+		match3(); // the equals
+		parseExpr3();
 			
-		}
 	}		
 }
 
@@ -193,6 +197,66 @@ function parseStringExpr3() {
 			parseStringExpr3();
 		}	
 	}	
+}
+
+function findType (identifier) {
+	var i = 1;
+	var identifierType = "";
+	var highestScope = -1;
+	while (i < identifiers.length) {
+		if (identifier = identifiers[i]) {
+			if (identifiers[i+1] === scope) {
+				return(identifiers[i-1]);
+			} else {
+				if (identifiers[i+1] > highestScope) {
+					highestScope = identifiers[i+1];
+					identifierType = identifiers[i-1];
+				}
+			}
+		}
+		i = i + 3;
+	}
+	return identifierType;
+}
+
+
+function typeCheck() {
+	var nextTokenValue = tokens[parseIndex3+2][1];
+	var variableType = findType(currentTokenValue);
+	if (variableType === "int") {
+		if (digits.indexOf(nextTokenValue) > -1) {
+			// correct type
+		} else if (chars.indexOf(nextTokenValue) > -1) {
+			if (findType(nextTokenValue) !== "int") {
+				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
+			} else {
+				// correct type
+			}
+		} else {
+			semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
+		}
+	} else if (variableType === "string") {
+		if (nextTokenValue === '"') {
+			// correct type
+		} else if (chars.indexOf(nextTokenValue) > -1) {
+			if (findType(nextTokenValue) !== "string") { 
+				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
+			} else {
+				// correct type
+			}	
+		}
+	} else if (variableType === "boolean") {
+		if (nextTokenValue === "true" || nextTokenValue === "false") {
+			// correct type
+		} else if (chars.indexOf(nextTokenValue) > -1) {
+			if (findType(nextTokenValue) !== "boolean") {
+				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
+			} else {
+				// correct type
+			}
+		}
+	}
+
 }
  
 function displayParse3Outcome() {
