@@ -96,7 +96,6 @@ function parseVarDecl3() {
 
 
 function parseAssignmentSatement3() {
-	console.log(currentTokenValue);
 	if (semanticAnalysisError === "") {
 		if (identifiers.indexOf(currentTokenValue) < 0) {
 			semanticAnalysisWarnings[warningCounter] = currentTokenValue + " was not initialized on line " + tokens[parseIndex3][2];
@@ -186,7 +185,6 @@ function parseBooleanExpr3() {
 					}
 					i++;
 				}
-				console.log(currentTokenValue);
 				typeCheck();
 				parseExpr3();
 			}	
@@ -278,7 +276,6 @@ function findType (identifier) {
 function typeCheck() {
 	var nextTokenValue = tokens[parseIndex3+2][1];
 	var variableType = findType(currentTokenValue);
-	console.log(variableType);
 	if (semanticAnalysisError === "") {
 		if (variableType === "int") {
 			if (digits.indexOf(nextTokenValue) > -1) {
@@ -301,6 +298,8 @@ function typeCheck() {
 				} else {
 					// correct type
 				}	
+			} else {
+				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
 			}
 		} else if (variableType === "boolean") {
 			if (nextTokenValue === "true" || nextTokenValue === "false") {
@@ -311,6 +310,8 @@ function typeCheck() {
 				} else {
 					// correct type
 				}
+			} else {
+				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
 			}
 		}
 	}	
