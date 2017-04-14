@@ -13,6 +13,7 @@ var warningCounter = 0;
 var semanticAnalysisWarnings = []
 var assignedId = "";
 var assignedIdType = "";
+var rowNum = 1;
 
 function match3() {
 	parseIndex3++;
@@ -33,10 +34,14 @@ function parse3() {
 		assignStatementCount = 0;
 		semanticAnalysisError = "";
 		identifiers = [];
+		semanticAnalysisWarnings = []
+		assignedId = "";
+		assignedIdType = "";
 		match3(); // the {
 		parseBlock3();
 		match3();
 		displayParse3Outcome();
+		displaySymbolTable();
 	}
 }
 
@@ -71,14 +76,6 @@ function parseBlock3() {
 
 function parseVarDecl3() {
 	if (semanticAnalysisError === "") {
-		var table = document.getElementById("symbolTable");
-		var row = table.insertRow(1);
-		var cell1 = row.insertCell(0);
-		var cell2 = row.insertCell(1);
-		var cell3 = row.insertCell(2);
-		var cell4 = row.insertCell(3);
-		var cell5 = row.insertCell(4);
-		cell2.innerHTML = currentTokenValue; // add the symbol type to the symbol table
 		identifiers.push(currentTokenValue);
 		match3(); // the type
 		var scopeCheck = identifiers.indexOf(currentTokenValue);
@@ -87,11 +84,7 @@ function parseVarDecl3() {
 		} else {
 			identifiers.push(currentTokenValue);
 			identifiers.push(scope);
-			varDeclCount++;
-			cell1.innerHTML = currentTokenValue; // add the symbol to the symbol table
-			cell3.innerHTML = scope; // add the scope to the symbol table
-			cell4.innerHTML = tokens[parseIndex][2]; // add the line number to the symbol table
-			cell5.innerHTML = programCounter; // add the program number to the symbol table
+			identifiers.push(tokens[parseIndex3][2]);
 			match3(); // the variable
 		}	
 	}		  
@@ -121,8 +114,7 @@ function parseAssignmentSatement3() {
 				identifiers.push(assignedId);
 				identifiers.push(scope);
 			}
-		} else {
-			assignStatementCount++;	
+		} else {	
 			typeCheck();
 			match3(); // the char
 			match3(); // the equals
@@ -253,7 +245,7 @@ function findType (identifier) {
 					}
 				}
 			}
-			i = i + 3;
+			i = i + 4;
 		}
 		return identifierType;
 	}	
@@ -305,6 +297,14 @@ function displayParse3Outcome() {
 	if (semanticAnalysisError === "") {
 		document.getElementById("output").innerHTML += '<p>Semantic Analysis Completed for program '+programCounter+' with no errors</p>';
 		document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
+	} else if (semanticAnalysisWarnings.length > 0) {
+		document.getElementById("output").innerHTML += '<p>Semantic Analysis Completed for program '+programCounter+' with '+semanticAnalysisWarnings.length+' warnings:</p>';
+		var i = 0;
+		while (i < semanticAnalysisWarnings.length) {
+			document.getElementById("output").innerHTML += '<p>'+semanticAnalysisWarnings[i]+'</p>';
+			i++;
+		}
+		document.getElementById("output").innerHTML += '<p>------------------------------------</p>';	
 	} else {
 		document.getElementById("output").innerHTML += '<p>Semantic Analysis Completed for program '+programCounter+' with an error:</p>';
 		document.getElementById("output").innerHTML += '<p>'+semanticAnalysisError+'</p>';
@@ -312,3 +312,31 @@ function displayParse3Outcome() {
 		document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
 	}	 
 }
+
+
+function displaySymbolTable() {
+	var i = 0
+	while (i < identifiers.length) {
+		var table = document.getElementById("symbolTable");
+		var row = table.insertRow(rowNum);
+		var cell1 = row.insertCell(0); // symbol
+		var cell2 = row.insertCell(1); // type
+		var cell3 = row.insertCell(2); // scope
+		var cell4 = row.insertCell(3); // line number
+		var cell5 = row.insertCell(4); // program
+		cell1.innerHTML = identifiers[i+1];
+		cell2.innerHTML = identifiers[i];
+		cell3.innerHTML = identifiers[i+2];
+		cell4.innerHTML = identifiers[i+3];
+		cell5.innerHTML = programCounter;
+		rowNum++;
+		i = i + 4;
+	}
+
+}
+
+
+
+
+
+
