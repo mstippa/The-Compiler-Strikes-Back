@@ -77,6 +77,7 @@ function parseIfStatement2() {
 	astTree.addNode("if", "branch");
 	match2(); // the if statement
 	parseBooleanExpr2();
+	match2(); // the paren
 }
 
 
@@ -84,6 +85,7 @@ function parseWhileStatement2() {
 	astTree.addNode("while", "branch");
 	match2(); // the while statement
 	parseBooleanExpr2();
+	match2(); // the paren
 }
 
 

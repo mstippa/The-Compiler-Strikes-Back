@@ -133,7 +133,12 @@ function parseAssignmentSatement3() {
 function parseIfStatement3() {
 	if (semanticAnalysisError === "") {
 		match3(); // the if statement
-		parseBooleanExpr3();	
+		match3(); // the paren
+		/*if (undeclaredIDs() === false) {
+			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
+		}*/
+		parseBooleanExpr3();
+		match3(); // the paren	
 	}	
 }
 
@@ -141,7 +146,12 @@ function parseIfStatement3() {
 function parseWhileStatement3() {
 	if (semanticAnalysisError === "") {
 		match3(); // the while statement
+		match3(); // the paren
+		/*if (undeclaredIDs() === false) {
+			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
+		}*/
 		parseBooleanExpr3();
+		match3(); // the paren
 	}		
 }
 
@@ -161,18 +171,23 @@ function parsePrintStatement3() {
 function parseBooleanExpr3() {
 	if (semanticAnalysisError === "") {
 		if (currentTokenValue !== "true" && currentTokenValue !== "false") {
-			match3(); // the paren
-			var i = parseIndex3+1;
-			while (i < tokens.length) {
-				if (tokens[i][1] === "==") {
-					break;
-				} else if (tokens[i][1] === "!=") {
-					break;
-				}
-				i++;
+			if (undeclaredIDs() === false) {
+				semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
 			}
-			typeCheck();
-			parseExpr3();
+			if (semanticAnalysisError === "") {
+				var i = parseIndex3+1;
+				while (i < tokens.length) {
+					if (tokens[i][1] === "==") {
+						break;
+					} else if (tokens[i][1] === "!=") {
+						break;
+					}
+					i++;
+				}
+				console.log(currentTokenValue);
+				typeCheck();
+				parseExpr3();
+			}	
 		} else {
 			// do nothing
 		}
@@ -313,7 +328,8 @@ function undeclaredIDs () {
 			i++;
 		}
 		return false;
-	}	
+	}
+	return true;	
 }
 
  
