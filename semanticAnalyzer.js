@@ -51,7 +51,6 @@ function parse3() {
 function parseBlock3() {
 	if (semanticAnalysisError === "") {
 		if (currentTokenValue !== "$") {
-			console.log(currentTokenValue);
 			if (typeKeywords.indexOf(currentTokenValue) > -1) {
 				parseVarDecl3();
 			} else if (chars.indexOf(currentTokenValue) > -1) {
@@ -95,6 +94,7 @@ function parseVarDecl3() {
 
 
 function parseAssignmentSatement3() {
+	console.log(currentTokenValue);
 	if (semanticAnalysisError === "") {
 		if (identifiers.indexOf(currentTokenValue) < 0) {
 			semanticAnalysisWarnings[warningCounter] = currentTokenValue + " was not initialized on line " + tokens[parseIndex3][2];
@@ -191,7 +191,6 @@ function parseExpr3() {
 				parseExpr3();
 			} else {
 				match3();
-				parseExpr3();
 			}
 		} else if (currentTokenValue === '"') {
 			match3(); // the quote
@@ -234,9 +233,9 @@ function findType (identifier) {
 	} else if (identifier === "false" || identifier === "true") {
 		return "boolean";
 	}
-	if (chars.indexOf(currentTokenValue) > -1) {
-		if (identifiers.indexOf(currentTokenValue) < 0) {
-			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
+	if (chars.indexOf(identifier) > -1) {
+		if (identifiers.indexOf(identifier) < 0) {
+			semanticAnalysisError = identifier + " was used before it was declared on line " + tokens[parseIndex3][2];
 		}
 	}
 	if (semanticAnalysisError === "") {	
@@ -261,6 +260,7 @@ function findType (identifier) {
 function typeCheck() {
 	var nextTokenValue = tokens[parseIndex3+2][1];
 	var variableType = findType(currentTokenValue);
+	console.log(variableType);
 	if (semanticAnalysisError === "") {
 		if (variableType === "int") {
 			if (digits.indexOf(nextTokenValue) > -1) {

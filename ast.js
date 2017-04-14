@@ -132,7 +132,6 @@ function parseExpr2() {
 		} else {
 			astTree.addNode(currentTokenValue, "leaf");
 			match2(); // the digit
-			parseExpr2();
 		}
 	} else if (currentTokenValue === '"') {
 		match2(); // the quote
