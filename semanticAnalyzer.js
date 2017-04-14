@@ -41,7 +41,9 @@ function parse3() {
 		match3(); // the {
 		parseBlock3();
 		match3();
+		unusedIDs();
 		displayParse3Outcome();
+
 		if (semanticAnalysisError === "") {
 			displaySymbolTable();
 		}	
@@ -199,8 +201,6 @@ function parseExpr3() {
 	if (semanticAnalysisError === "") {
 		if (chars.indexOf(currentTokenValue) > -1) {
 				match3(); // the id
-				match3(); // the boolop
-				parseExpr3();
 		} else if (digits.indexOf(currentTokenValue) > -1) {
 			if (tokens[parseIndex3+1][1] === "+") {
 				typeCheck();
@@ -318,7 +318,7 @@ function typeCheck() {
 }
 
 
-function undeclaredIDs () {
+function undeclaredIDs() {
 	if (chars.indexOf(currentTokenValue) > -1) {
 		var i = 0;
 		while (i < tokens.length) {
@@ -333,6 +333,28 @@ function undeclaredIDs () {
 }
 
  
+function unusedIDs() {
+	var i = 1;
+	while (i < identifiers.length) {
+		if (chars.indexOf(identifiers[i]) > -1) {
+			var j = 0;
+			var counter = 0;
+			while (j < tokens.length) {
+				if (tokens[j][1] === identifiers[i] && tokens[j+1][1] === "=") {
+					counter++;
+				} 				
+				j++;
+			}
+			if (counter === 0) {
+				semanticAnalysisWarnings[warningCounter] = identifiers[i] + " was declared but not used";
+				warningCounter++;
+			}	
+		}
+		i = i + 4;
+	}
+}
+
+
 function displayParse3Outcome() {
 	if (semanticAnalysisError === "") {
 		document.getElementById("output").innerHTML += '<p>Semantic Analysis Completed for program '+programCounter+' with no errors and '+semanticAnalysisWarnings.length+' warning(s)</p>';

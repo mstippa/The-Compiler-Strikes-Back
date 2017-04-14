@@ -122,8 +122,8 @@ function parseExpr2() {
 	if (chars.indexOf(currentTokenValue) > -1) {
 			astTree.addNode(currentTokenValue, "leaf");
 			match2(); // the id
-			match2(); // the boolop
-			parseExpr2();
+			//match2(); // the boolop
+			//parseExpr2();
 	} else if (digits.indexOf(currentTokenValue) > -1) {
 		if (tokens[parseIndex2+1][1] === "+") {
 			astTree.addNode("+", "branch");
