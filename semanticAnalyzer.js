@@ -37,11 +37,14 @@ function parse3() {
 		semanticAnalysisWarnings = []
 		assignedId = "";
 		assignedIdType = "";
+		warningCounter = 0;
 		match3(); // the {
 		parseBlock3();
 		match3();
 		displayParse3Outcome();
-		displaySymbolTable();
+		if (semanticAnalysisError === "") {
+			displaySymbolTable();
+		}	
 	}
 }
 
@@ -105,14 +108,17 @@ function parseAssignmentSatement3() {
 				identifiers.push("int");
 				identifiers.push(assignedId);
 				identifiers.push(scope);
+				identifiers.push(tokens[parseIndex3][2])
 			} else if (assignedId === '"') {
 				identifiers.push("string");
 				identifiers.push(assignedId);
 				identifiers.push(scope);
+				identifiers.push(tokens[parseIndex3][2])
 			} else if (assignedId === "(" || assignedId === "true" || assignedId === "false") {
 				identifiers.push("boolean");
 				identifiers.push(assignedId);
 				identifiers.push(scope);
+				identifiers.push(tokens[parseIndex3][2]);
 			}
 		} else {	
 			typeCheck();
@@ -295,14 +301,13 @@ function typeCheck() {
  
 function displayParse3Outcome() {
 	if (semanticAnalysisError === "") {
-		document.getElementById("output").innerHTML += '<p>Semantic Analysis Completed for program '+programCounter+' with no errors</p>';
-		document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
-	} else if (semanticAnalysisWarnings.length > 0) {
-		document.getElementById("output").innerHTML += '<p>Semantic Analysis Completed for program '+programCounter+' with '+semanticAnalysisWarnings.length+' warnings:</p>';
-		var i = 0;
-		while (i < semanticAnalysisWarnings.length) {
-			document.getElementById("output").innerHTML += '<p>'+semanticAnalysisWarnings[i]+'</p>';
-			i++;
+		document.getElementById("output").innerHTML += '<p>Semantic Analysis Completed for program '+programCounter+' with no errors and '+semanticAnalysisWarnings.length+' warning(s)</p>';
+		if (semanticAnalysisWarnings.length > 0) {
+			var i = 0;
+			while (i < semanticAnalysisWarnings.length) {
+				document.getElementById("output").innerHTML += '<p>'+semanticAnalysisWarnings[i]+'</p>';
+				i++;
+			}	
 		}
 		document.getElementById("output").innerHTML += '<p>------------------------------------</p>';	
 	} else {
@@ -332,7 +337,6 @@ function displaySymbolTable() {
 		rowNum++;
 		i = i + 4;
 	}
-
 }
 
 

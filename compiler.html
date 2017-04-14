@@ -106,12 +106,35 @@
 			varDeclCount = 0;
 			assignStatementCount = 0;
 			semanticAnalysisError = "";
+			semanticAnalysisWarnings = []
+			assignedId = "";
+			assignedIdType = "";
 			identifiers = [];
+			warningCounter = 0;
+			rowNum = 1;
 			cstTree = new Tree();
 			astTree = new  Tree();
 			document.getElementById("output").innerHTML = "";
 			document.getElementById("ctree").innerHTML = "";
 			document.getElementById("atree").innerHTML = "";
+			var table = document.getElementById("symbolTable");
+			clearTable(table);
+
+			function clearTable(e)
+				{
+				    var i=e.rows.length; //get the count of rows in table
+				    if (i > 0); {
+					    var ctr=0; // a counter variable
+					    while (ctr<i-1) {
+			              e.deleteRow(1);
+			              ctr++;
+					    }
+					}      
+				}
+
+			/*while(document.getElementById("symbolTable").rows.length > 0) {
+  				document.getElementById("symbolTable").deleteRow(0);
+			}*/
 		}
 
 
