@@ -150,6 +150,9 @@ function parsePrintStatement3() {
 	if (semanticAnalysisError === "") {
 		match3(); // the print statement
 		match3(); // the paren
+		if (undeclaredIDs() === false) {
+			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
+		}
 		typeCheck();
 		parseExpr3();
 	}	
@@ -298,6 +301,21 @@ function typeCheck() {
 	}	
 
 }
+
+
+function undeclaredIDs () {
+	if (chars.indexOf(currentTokenValue) > -1) {
+		var i = 0;
+		while (i < tokens.length) {
+			if (tokens[i][1] === currentTokenValue && tokens[i+1][1] === "=") {
+				return true;
+			}
+			i++;
+		}
+		return false;
+	}	
+}
+
  
 function displayParse3Outcome() {
 	if (semanticAnalysisError === "") {
