@@ -11,6 +11,8 @@ var semanticAnalysisError = "";
 var identifiers = [];
 var warningCounter = 0;
 var semanticAnalysisWarnings = []
+var assignedId = "";
+var assignedIdType = "";
 
 function match3() {
 	parseIndex3++;
@@ -98,17 +100,34 @@ function parseVarDecl3() {
 
 function parseAssignmentSatement3() {
 	if (semanticAnalysisError === "") {
-		if (assignStatementCount >= varDeclCount) {
-			semanticAnalysisWarnings[warningCounter] = currentTokenValue + " was not initialized";
+		if (identifiers.indexOf(currentTokenValue) < 0) {
+			semanticAnalysisWarnings[warningCounter] = currentTokenValue + " was not initialized on line " + tokens[parseIndex3][2];
 			warningCounter++;
+			assignedId = currentTokenValue;
+			match3(); // the char
+			match3(); // the equals
+			assignedIdType = currentTokenValue;
+			parseExpr3();
+			if (digits.indexOf(assignedIdType) > -1) {
+				identifiers.push("int");
+				identifiers.push(assignedId);
+				identifiers.push(scope);
+			} else if (assignedId === '"') {
+				identifiers.push("string");
+				identifiers.push(assignedId);
+				identifiers.push(scope);
+			} else if (assignedId === "(" || assignedId === "true" || assignedId === "false") {
+				identifiers.push("boolean");
+				identifiers.push(assignedId);
+				identifiers.push(scope);
+			}
+		} else {
+			assignStatementCount++;	
 			typeCheck();
+			match3(); // the char
+			match3(); // the equals
+			parseExpr3();
 		}	
-		assignStatementCount++;
-		typeCheck();
-		match3(); // the char
-		match3(); // the equals
-		parseExpr3();
-			
 	}		
 }
 
@@ -205,6 +224,7 @@ function parseStringExpr3() {
 	}	
 }
 
+
 function findType (identifier) {
 	var i = 1;
 	var identifierType = "";
@@ -213,65 +233,71 @@ function findType (identifier) {
 		return "int";
 	} else if (identifier === '"') {
 		return "string";
+	} else if (identifier === "false" || identifier === "true") {
+		return "boolean";
 	}
 	if (chars.indexOf(currentTokenValue) > -1) {
 		if (identifiers.indexOf(currentTokenValue) < 0) {
 			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
 		}
-	}	
-	while (i < identifiers.length) {
-		if (identifier === identifiers[i]) {
-			if (identifiers[i+1] === scope) {
-				return(identifiers[i-1]);
-			} else {
-				if (identifiers[i+1] > highestScope) {
-					highestScope = identifiers[i+1];
-					identifierType = identifiers[i-1];
+	}
+	if (semanticAnalysisError === "") {	
+		while (i < identifiers.length) {
+			if (identifier === identifiers[i]) {
+				if (identifiers[i+1] === scope) {
+					return(identifiers[i-1]);
+				} else {
+					if (identifiers[i+1] > highestScope) {
+						highestScope = identifiers[i+1];
+						identifierType = identifiers[i-1];
+					}
 				}
 			}
+			i = i + 3;
 		}
-		i = i + 3;
-	}
-	return identifierType;
+		return identifierType;
+	}	
 }
 
 
 function typeCheck() {
 	var nextTokenValue = tokens[parseIndex3+2][1];
 	var variableType = findType(currentTokenValue);
-	if (variableType === "int") {
-		if (digits.indexOf(nextTokenValue) > -1) {
-			// correct type
-		} else if (chars.indexOf(nextTokenValue) > -1) {
-			if (findType(nextTokenValue) !== "int") {
-				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
-			} else {
+	if (semanticAnalysisError === "") {
+		if (variableType === "int") {
+			if (digits.indexOf(nextTokenValue) > -1) {
 				// correct type
+			} else if (chars.indexOf(nextTokenValue) > -1) {
+				if (findType(nextTokenValue) !== "int") {
+					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
+				} else {
+					// correct type
+				}
+			} else {
+				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
 			}
-		} else {
-			semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
-		}
-	} else if (variableType === "string") {
-		if (nextTokenValue === '"') {
-			// correct type
-		} else if (chars.indexOf(nextTokenValue) > -1) {
-			if (findType(nextTokenValue) !== "string") { 
-				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
-			} else {
+		} else if (variableType === "string") {
+			if (nextTokenValue === '"') {
 				// correct type
-			}	
-		}
-	} else if (variableType === "boolean") {
-		if (nextTokenValue === "true" || nextTokenValue === "false") {
-			// correct type
-		} else if (chars.indexOf(nextTokenValue) > -1) {
-			if (findType(nextTokenValue) !== "boolean") {
-				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
-			} else {
+			} else if (chars.indexOf(nextTokenValue) > -1) {
+				if (findType(nextTokenValue) !== "string") { 
+					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
+				} else {
+					// correct type
+				}	
+			}
+		} else if (variableType === "boolean") {
+			if (nextTokenValue === "true" || nextTokenValue === "false") {
 				// correct type
+			} else if (chars.indexOf(nextTokenValue) > -1) {
+				if (findType(nextTokenValue) !== "boolean") {
+					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2];
+				} else {
+					// correct type
+				}
 			}
 		}
-	}
+	}	
 
 }
  
