@@ -32,6 +32,7 @@ function parse () {
 	} else {
 		parseIndex = startOfProgram;
 		parseIndex2 = startOfProgram;
+		parseIndex3 = startOfProgram;
 		currentTokenValue = tokens[parseIndex][1];
 	}	
 	errorCounter = 0;
@@ -367,7 +368,6 @@ function parseBooleanExpr() {
 		parseExpr();
 		cstTree.endChildren();
 		if (!parseErrors.length > 0) {
-			console.log(currentTokenValue);
 			parseBoolop();
 			cstTree.endChildren();
 			if (!parseErrors.length > 0) {

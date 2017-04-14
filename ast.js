@@ -33,6 +33,7 @@ function parseBlock2() {
 			parseVarDecl2();
 		} else if (chars.indexOf(currentTokenValue) > -1) {
 			parseAssignmentStatement2();
+			match2();
 		} else if (currentTokenValue === "if") {
 			parseIfStatement2();
 		} else if (currentTokenValue === "while") {
@@ -47,6 +48,8 @@ function parseBlock2() {
 			match2();
 			astTree.endChildren();
 			parseBlock2();
+		} else {
+			match2();
 		}
 		parseBlock2();
 	}	
@@ -102,7 +105,7 @@ function parseBooleanExpr2() {
 		match2(); // the paren
 		var i = parseIndex2+1;
 		while (i < tokens.length) {
-			if (tokens[i][1] === "==") {
+			if (tokens[parseIndex2][1] === "==") {
 				astTree.addNode("isEqual", "branch");
 				break;
 			} else if (tokens[i][1] === "!=") {
@@ -113,7 +116,16 @@ function parseBooleanExpr2() {
 		}
 		parseExpr2();
 	} else {
-		astTree.addNode(currentTokenValue, "leaf");
+		if (tokens[parseIndex2+1][1] === "==" || tokens[parseIndex2+1][1] === "!=") {
+			astTree.addNode("boolop", "branch");
+			astTree.addNode(currentTokenValue, "leaf");
+			match2(); // the boolval
+			match2(); // the boolop
+			parseExpr2();
+		} else {
+			astTree.addNode(currentTokenValue, "leaf");
+			match2();
+		}
 	}
 }
 
@@ -138,7 +150,7 @@ function parseExpr2() {
 	} else if (currentTokenValue === '"') {
 		match2(); // the quote
 		parseStringExpr2();
-	} else if (currentTokenValue === "(") {
+	} else if (currentTokenValue === "(" || currentTokenValue === "true" || currentTokenValue === "false") {
 		parseBooleanExpr2();
 	} else if (currentTokenValue === "==" || currentTokenValue === "!==") {
 		match2();
@@ -149,10 +161,7 @@ function parseExpr2() {
 	} else if (currentTokenValue === ")") {
 		match2();
 		astTree.endChildren();
-	} else if (currentTokenValue === "true" || currentTokenValue === "false") {
-		astTree.addNode(currentTokenValue, "branch");
-		match2();
-	}
+	} 
 }
 
 
