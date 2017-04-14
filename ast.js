@@ -149,6 +149,9 @@ function parseExpr2() {
 	} else if (currentTokenValue === ")") {
 		match2();
 		astTree.endChildren();
+	} else if (currentTokenValue === "true" || currentTokenValue === "false") {
+		astTree.addNode(currentTokenValue, "branch");
+		match2();
 	}
 }
 

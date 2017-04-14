@@ -222,6 +222,8 @@ function parseExpr3() {
 			parseBlock3();
 		} else if (currentTokenValue === ")") {
 			match3();
+		} else if (currentTokenValue === "false" || currentTokenValue === "true") {
+			match3();
 		}
 	}		
 }
