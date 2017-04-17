@@ -52,7 +52,6 @@ function parse3() {
 
 function parseBlock3() {
 	if (semanticAnalysisError === "") {
-		console.log(currentTokenValue);
 		if (currentTokenValue !== "$") {
 			if (typeKeywords.indexOf(currentTokenValue) > -1) {
 				parseVarDecl3();
@@ -289,6 +288,8 @@ function typeCheck() {
 				} else {
 					// correct type
 				}
+			} else if (tokens[parseIndex3+1][1] === ")") {
+				// correct type	 	
 			} else {
 				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting an int";
 			}
@@ -300,7 +301,9 @@ function typeCheck() {
 					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] +" expecting a string";
 				} else {
 					// correct type
-				}	
+				}
+			} else if (tokens[parseIndex3+1][1] === ")") {
+				// correct type	 	
 			} else {
 				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] +" expecting a string";
 			}
@@ -313,6 +316,8 @@ function typeCheck() {
 				} else {
 					// correct type
 				}
+			} else if (tokens[parseIndex3+1][1] === ")") {
+				// correct type	
 			} else {
 				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting a boolean";
 			}
