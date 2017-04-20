@@ -413,7 +413,7 @@ function parseCharList() {
 		document.getElementById("output").innerHTML += '<p>parseCharList()</p>';
 		cstTree.addNode("CharList", "branch");
 		parseChar();
-		cstTree.endChildren();
+		// cstTree.endChildren();
 		if (!parseErrors.length > 0) {
 			parseCharList();
 			cstTree.endChildren();
