@@ -32,7 +32,7 @@ h1 {
     padding-right: 0px;
 }
 
-.verboseOutput {
+.output {
 	border: 1px solid black;
 	height: 400px;
 	overflow-y: auto;

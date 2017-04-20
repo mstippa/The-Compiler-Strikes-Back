@@ -16,7 +16,6 @@ var endFile = "$";
 var digits = ["0","1","2","3","4","5","6","7","8","9"];
 var currentToken = "";
 var index = 0; 
-var index = 0;
 var input = "";
 var tokenName = "";
 var lineCounter = 1;
@@ -224,13 +223,13 @@ function displayTokens() {
 			tokens[index][3] = programCounter; // add the program number as an attribute to the end of program token
 			document.getElementById("output").innerHTML += '<p>token: '+tokens[index][0]+' value: '+tokens[index][1]+'</p>'; // displays the end of file token 
 			document.getElementById("output").innerHTML += '<p>Lex completed for program '+programCounter+ ' with '+lexerErrorCounter+' errors</p>'; // displays the program number and number of errors
-			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
+			document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
 			index++;
 			if (lexerErrorCounter !== 0) {
 				lexFailed = true;
 				startOfProgram = index;
 			} else {
-				parsePrograms();
+				parsePrograms(); // parse the program
 				lexFailed = false;
 			}
 			lexerErrorCounter = 0;
@@ -260,8 +259,8 @@ function displayTokens() {
 			programCounter++;
 			tokens[index] = ["token_eof","$", lineCounter, programCounter];
 			document.getElementById("output").innerHTML += '<p>End of file token not found, but lex still completed with '+lexerErrorCounter+' errors</p>'; // displays a warning message
-			document.getElementById("output").innerHTML += '<p>-----------------------------------------------------------------</p>';
-			parsePrograms();
+			document.getElementById("output").innerHTML += '<p>------------------------------------</p>';
+			parsePrograms(); // parse the program
 			index++;
 			lexerErrorCounter = 0;
 		}	
