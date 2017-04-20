@@ -241,7 +241,7 @@ function parseStringExpr3() {
 
 
 function findType (identifier) {
-	var i = 1;
+	findTypeIndex = 1;
 	var identifierType = "";
 	var highestScope = -1;
 	if (digits.indexOf(identifier) > -1) {
@@ -257,23 +257,43 @@ function findType (identifier) {
 		}
 	}
 	if (semanticAnalysisError === "") {	
-		while (i < identifiers.length) {
-			if (identifier === identifiers[i]) {
-				if (identifiers[i+1] === scope) {
-					return(identifiers[i-1]);
+		while (findTypeIndex < identifiers.length) {
+			if (identifier === identifiers[findTypeIndex]) {
+				if (identifiers[findTypeIndex+1] === scope) {
+					return(identifiers[findTypeIndex-1]);
 				} else {
-					if (identifiers[i+1] > highestScope) {
-						highestScope = identifiers[i+1];
-						identifierType = identifiers[i-1];
+					if (identifiers[findTypeIndex+1] > highestScope) {
+						highestScope = identifiers[findTypeIndex+1];
+						identifierType = identifiers[findTypeIndex-1];
 					}
 				}
 			}
-			i = i + 4;
+			findTypeIndex = findTypeIndex + 4;
 		}
 		return identifierType;
 	}	
 }
 
+
+function findId(identifier) {
+	var identifierScope = 0;
+	var highestScope = -1;
+	var i = 1;
+	while (i < identifiers.length) {
+			if (identifier === identifiers[i]) {
+				if (identifiers[i+1] === scope) {
+					return(identifiers[i+1]);
+				} else {
+					if (identifiers[i+1] > highestScope) {
+						highestScope = identifiers[i+1];
+						identifierScope = identifiers[i+1];
+					}
+				}
+			}
+			i = i + 4;
+		}
+		return identifierScope;
+}
 
 function typeCheck() {
 	var nextTokenValue = tokens[parseIndex3+2][1];
@@ -286,6 +306,9 @@ function typeCheck() {
 				if (findType(nextTokenValue) !== "int") {
 					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting an int";
 				} else {
+					if (findId(nextTokenValue) > findId(currentTokenValue)) {
+						semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
+					}
 					// correct type
 				}
 			} else if (tokens[parseIndex3+1][1] === ")") {
@@ -300,6 +323,9 @@ function typeCheck() {
 				if (findType(nextTokenValue) !== "string") { 
 					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] +" expecting a string";
 				} else {
+					if (findId(nextTokenValue) > findId(currentTokenValue)) {
+						semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
+					}
 					// correct type
 				}
 			} else if (tokens[parseIndex3+1][1] === ")") {
@@ -314,6 +340,9 @@ function typeCheck() {
 				if (findType(nextTokenValue) !== "boolean") {
 					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting a boolean";
 				} else {
+					if (findId(nextTokenValue) > findId(currentTokenValue)) {
+						semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
+					}
 					// correct type
 				}
 			} else if (tokens[parseIndex3+1][1] === ")") {
