@@ -14,6 +14,7 @@ var semanticAnalysisWarnings = []
 var assignedId = "";
 var assignedIdType = "";
 var rowNum = 1;
+var previousScope = 0;
 
 function match3() {
 	parseIndex3++;
@@ -58,8 +59,10 @@ function parseBlock3() {
 			} else if (chars.indexOf(currentTokenValue) > -1) {
 				parseAssignmentSatement3();
 			} else if (currentTokenValue === "if") {
+				//previousScope = scope;
 				parseIfStatement3();
 			} else if (currentTokenValue === "while") {
+				// previousScope = scope;
 				parseWhileStatement3();
 			} else if (currentTokenValue === "print") {
 				parsePrintStatement3();
@@ -123,7 +126,7 @@ function parseAssignmentSatement3() {
 				identifiers.push(scope);
 				identifiers.push(tokens[parseIndex3][2]);
 			}
-		} else {	
+		} else {
 			typeCheck();
 			match3(); // the char
 			match3(); // the equals
@@ -136,12 +139,12 @@ function parseAssignmentSatement3() {
 function parseIfStatement3() {
 	if (semanticAnalysisError === "") {
 		match3(); // the if statement
-		match3(); // the paren
+		//match3(); // the paren
 		/*if (undeclaredIDs() === false) {
 			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
 		}*/
 		parseBooleanExpr3();
-		match3(); // the paren	
+		match3(); // the paren
 	}	
 }
 
@@ -149,7 +152,7 @@ function parseIfStatement3() {
 function parseWhileStatement3() {
 	if (semanticAnalysisError === "") {
 		match3(); // the while statement
-		match3(); // the paren
+		//match3(); // the paren
 		/*if (undeclaredIDs() === false) {
 			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
 		}*/
@@ -166,8 +169,9 @@ function parsePrintStatement3() {
 		if (undeclaredIDs() === false) {
 			semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
 		}
-		typeCheck();
+		//typeCheck();
 		parseExpr3();
+		match3();
 	}	
 }
 
@@ -179,17 +183,20 @@ function parseBooleanExpr3() {
 				semanticAnalysisError = currentTokenValue + " was used before it was declared on line " + tokens[parseIndex3][2];
 			}
 			if (semanticAnalysisError === "") {
-				typeCheck();
+				//typeCheck();
 				parseExpr3();
+				if (currentTokenValue === "!=" || currentTokenValue === "==") {
+					parseExpr3();
+				}
 			}	
 		} else {
 			if (tokens[parseIndex3+1][1] === "==" || tokens[parseIndex3+1][1] === "!=") {
 			match3(); // the boolval
 			match3(); // the boolop
 			parseExpr3();
-		} else {
-			match3();
-		}
+			} else {
+				match3();
+			}
 		}
 	}	
 }
@@ -198,6 +205,7 @@ function parseBooleanExpr3() {
 function parseExpr3() {
 	if (semanticAnalysisError === "") {
 		if (chars.indexOf(currentTokenValue) > -1) {
+				typeCheck();
 				match3(); // the id
 		} else if (digits.indexOf(currentTokenValue) > -1) {
 			if (tokens[parseIndex3+1][1] === "+") {
@@ -209,11 +217,18 @@ function parseExpr3() {
 				match3();
 			}
 		} else if (currentTokenValue === '"') {
-			match3(); // the quote
-			parseStringExpr3();
+			if (tokens[parseIndex3-1][1] === "=") {
+				match3();
+				parseStringExpr3();
+			} else {
+				typeCheck();
+				//console.log(currentTokenValue);
+				match3(); // the quote
+				//parseStringExpr3();
+			}
 		} else if (currentTokenValue === "(" || currentTokenValue === "true" || currentTokenValue === "false") {
 			parseBooleanExpr3();
-		} else if (currentTokenValue === "==" || currentTokenValue === "!==") {
+		} else if (currentTokenValue === "==" || currentTokenValue === "!=") {
 			match3();
 			parseExpr3();
 		} else if (currentTokenValue === "{") {
@@ -240,13 +255,23 @@ function parseStringExpr3() {
 }
 
 
+function identifyString() {
+	if (currentTokenValue === '"') {
+	} else {
+		match3();
+		identifyString();
+	}
+}
+
 function findType (identifier) {
 	findTypeIndex = 1;
 	var identifierType = "";
-	var highestScope = -1;
+	var highestScope = 50;
 	if (digits.indexOf(identifier) > -1) {
 		return "int";
 	} else if (identifier === '"') {
+		match3(); // the quote
+		identifyString();
 		return "string";
 	} else if (identifier === "false" || identifier === "true") {
 		return "boolean";
@@ -260,9 +285,13 @@ function findType (identifier) {
 		while (findTypeIndex < identifiers.length) {
 			if (identifier === identifiers[findTypeIndex]) {
 				if (identifiers[findTypeIndex+1] === scope) {
-					return(identifiers[findTypeIndex-1]);
+					if (checkScope(identifiers[findTypeIndex])) {
+						return(identifiers[findTypeIndex-1]);
+					} else {
+						// do nothing
+					}
 				} else {
-					if (identifiers[findTypeIndex+1] > highestScope) {
+					if (identifiers[findTypeIndex+1] < highestScope) {
 						highestScope = identifiers[findTypeIndex+1];
 						identifierType = identifiers[findTypeIndex-1];
 					}
@@ -270,21 +299,26 @@ function findType (identifier) {
 			}
 			findTypeIndex = findTypeIndex + 4;
 		}
+		//console.log(identifierType);
 		return identifierType;
 	}	
 }
 
 
-function findId(identifier) {
+function findScope(identifier) {
 	var identifierScope = 0;
-	var highestScope = -1;
+	var highestScope = 50;
 	var i = 1;
 	while (i < identifiers.length) {
 			if (identifier === identifiers[i]) {
 				if (identifiers[i+1] === scope) {
-					return(identifiers[i+1]);
+					if (checkScope(identifiers[i])) {
+						return(identifiers[i+1]);
+					} else {
+						// do nothing
+					}		
 				} else {
-					if (identifiers[i+1] > highestScope) {
+					if (identifiers[i+1] < highestScope) {
 						highestScope = identifiers[i+1];
 						identifierScope = identifiers[i+1];
 					}
@@ -295,44 +329,103 @@ function findId(identifier) {
 		return identifierScope;
 }
 
+
+function checkScope(id) {
+	console.log(id);
+	var i = 0;
+	while (i < tokens.length) {
+		if (tokens[i][1] === "if" || tokens[i][1] === "while") {
+			i++
+			while (i !== "}") {
+				if (id === tokens[i][1] && tokens[i][0] === "token_id") {
+					if (tokens[i-1][1] !== "(" || tokens[i+1][1] !== ")") {
+						if (tokens[i-1][0] === "token_string" || tokens[i-1][0] === "token_int" || tokens[i-1][0] === "token_boolean") {
+							var idType = tokens[i-1][0];
+							var n = 1;
+							if (idType === "token_string") {
+								idType = "string"
+							} else if (idType === "token_int") {
+								idType = "int"
+							} else {
+								idType = "boolean"
+							}	
+							while (n < identifiers.length) {
+								if (identifiers[n] === id && identifiers[n-1] === idType) {
+									if (identifiers[n+1] === scope) {
+										return false;
+									} else {
+										return true
+									}
+								}
+								n++; 
+							}			
+						} else {
+							return true;
+						}
+					}		
+				}
+				i++;
+			}
+			return true;	
+		}
+		i++;
+	}
+	return true;
+}
+
+
 function typeCheck() {
-	var nextTokenValue = tokens[parseIndex3+2][1];
 	var variableType = findType(currentTokenValue);
+	var nextTokenValue = tokens[parseIndex3+2][1];
+	console.log(nextTokenValue);
 	if (semanticAnalysisError === "") {
 		if (variableType === "int") {
 			if (digits.indexOf(nextTokenValue) > -1) {
 				// correct type
 			} else if (chars.indexOf(nextTokenValue) > -1) {
-				if (findType(nextTokenValue) !== "int") {
-					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting an int";
-				} else {
-					if (findId(nextTokenValue) > findId(currentTokenValue)) {
-						semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
+				//console.log(findType(nextTokenValue));
+				if (tokens[parseIndex3+1][1] === "==" || tokens[parseIndex3+1][1] === "!=" || tokens[parseIndex3+1][1] === "+" || tokens[parseIndex3+1][1] === "=") {
+					if (findType(nextTokenValue) !== "int") {
+						semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting an int";
+					} else {
+						if (findScope(nextTokenValue) > findScope(currentTokenValue)) {
+							semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
+						}
+						// correct type
 					}
-					// correct type
-				}
+				}	
 			} else if (tokens[parseIndex3+1][1] === ")") {
-				// correct type	 	
-			} else {
+				// correct type	
+			} else if (nextTokenValue === '"') {
 				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting an int";
-			}
+			}	 	
+			// } else {
+			// 	console.log(currentTokenValue);
+			// 	console.log(nextTokenValue);
+			// 	semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting an int";
+			// }
 		} else if (variableType === "string") {
 			if (nextTokenValue === '"') {
 				// correct type
 			} else if (chars.indexOf(nextTokenValue) > -1) {
-				if (findType(nextTokenValue) !== "string") { 
-					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] +" expecting a string";
-				} else {
-					if (findId(nextTokenValue) > findId(currentTokenValue)) {
-						semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
+				if (tokens[parseIndex3+1][1] === "==" || tokens[parseIndex3+1][1] === "!=" || tokens[parseIndex3+1][1] === "+" || tokens[parseIndex3+1][1] === "=") {
+					if (findType(nextTokenValue) !== "string") { 
+						semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] +" expecting a string";
+					} else {
+						if (findScope(nextTokenValue) > findScope(currentTokenValue)) {
+							semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
+						}
+						// correct type
 					}
-					// correct type
-				}
+				}	
 			} else if (tokens[parseIndex3+1][1] === ")") {
 				// correct type	 	
-			} else {
-				semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] +" expecting a string";
-			}
+			} else if (currentTokenValue === ")") {
+				// correct type
+			}	
+			// } else {
+			// 	semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] +" expecting a string";
+			// }
 		} else if (variableType === "boolean") {
 			if (nextTokenValue === "true" || nextTokenValue === "false" || nextTokenValue === "(") {
 				// correct type
@@ -340,7 +433,7 @@ function typeCheck() {
 				if (findType(nextTokenValue) !== "boolean") {
 					semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting a boolean";
 				} else {
-					if (findId(nextTokenValue) > findId(currentTokenValue)) {
+					if (findScope(nextTokenValue) > findScope(currentTokenValue)) {
 						semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
 					}
 					// correct type
