@@ -69,7 +69,11 @@ function parseProgram() {
 	document.getElementById("output").innerHTML += '<p>parseProgram()</p>';
 	cstTree.addNode("Program", "branch"); // create a Program branch node for concrete syntax tree
 	parseBlock();
-	cstTree.endChildren(); // end the children aka we're done with this branch of the cstTree
+	//cstTree.endChildren(); // end the children aka we're done with this branch of the cstTree
+	while (cstTree.traversalDepth > 0) {
+		cstTree.endChildren();
+		cstTree.traversalDepth--;
+	}
 	// if error was found then don't continue with the parse
 	if (!parseErrors.length > 0) {
 		// if end of file token was not found at this point in the parse then that's an error!
@@ -106,9 +110,21 @@ function parseBlock() {
 				if (!parseErrors.length > 0) {
 					// if here then } should be the current token 
 					if (currentTokenValue === "}") {
-						cstTree.addNode("}","leaf");
-						cstTree.endChildren();
-						match();
+						if (tokens[parseIndex+1][1] === "$") {
+							var treeDepth = cstTree.countDepth();
+							console.log(cstTree.countDepth());
+							while (treeDepth > 5) {
+								cstTree.endChildren();
+								treeDepth--;
+							}
+							cstTree.addNode("}","leaf");
+							cstTree.endChildren();	
+							match();
+						} else {
+							cstTree.endChildren();
+							cstTree.addNode("}","leaf");	
+							match();
+						}	
 					} else {
 						parseErrors = ["}", currentTokenValue, tokens[parseIndex][2]];
 						match();
@@ -538,6 +554,7 @@ function Tree() {
     
     this.root = null;  // Note the NULL root node of this Tree.
     this.cur = {};     // Note the EMPTY current node of the Tree we're building.
+    this.traversalDepth = 0;
 
 
     // -- ------- --
@@ -568,11 +585,13 @@ function Tree() {
         if (kind == "branch") {
             // ... update the CURrent node pointer to ourselves.
             this.cur = node;
+            this.traversalDepth++;
         }
     };
 
     // Note that we're done with this branch of the Tree...
     this.endChildren = function() {
+    	this.traversalDepth--;
         // ... by moving "up" to our parent node (if possible).
         if ((this.cur.parent !== null) && (this.cur.parent.name !== undefined)) {
             this.cur = this.cur.parent;
@@ -581,6 +600,31 @@ function Tree() {
             // This really should not happen, but it will, of course.
         }
     };
+
+    this.countDepth = function() {
+    	var depthCounter = "";
+    	var poop = 0;
+    	function findDepth(node, depth) {
+            // Space out based on the current depth so
+            // this looks at least a little Tree-like.
+            for (var i = 0; i < depth; i++) {
+                depthCounter += "-";
+                poop++
+            }
+            if (!node.children || node.children.length === 0) {
+            	depthCounter = "";
+            } else {
+            	depthCounter = "";
+                for (var i = 0; i < node.children.length; i++) {
+                	poop = 0;
+                    findDepth(node.children[i], depth + 1);
+                }
+            }
+        }
+        findDepth(this.root, 0);
+        return (poop);
+
+    }
 
     // Return a string representation of the cstTree.
     this.toString = function() {

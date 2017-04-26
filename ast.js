@@ -68,7 +68,6 @@ function parseVarDecl2() {
 	astTree.addNode(currentTokenValue, "leaf");
 	astTree.endChildren();
 	match2(); // the variable
-	console.log(currentTokenValue);
 }
 
 
@@ -113,11 +112,9 @@ function parsePrintStatement2() {
 function parseBooleanExpr2() {
 	if (currentTokenValue !== "true" && currentTokenValue !== "false") {
 		match2(); // the paren
-		console.log(currentTokenValue);
 		var i = parseIndex2+1;
 		while (i < tokens.length) {
 			if (tokens[i][1] === "==") {
-				console.log("poop");
 				astTree.addNode("isEqual", "branch");
 				break;
 			} else if (tokens[i][1] === "!=") {

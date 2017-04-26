@@ -331,7 +331,6 @@ function findScope(identifier) {
 
 
 function checkScope(id) {
-	console.log(id);
 	var i = 0;
 	while (i < tokens.length) {
 		if (tokens[i][1] === "if" || tokens[i][1] === "while") {
@@ -377,7 +376,6 @@ function checkScope(id) {
 function typeCheck() {
 	var variableType = findType(currentTokenValue);
 	var nextTokenValue = tokens[parseIndex3+2][1];
-	console.log(nextTokenValue);
 	if (semanticAnalysisError === "") {
 		if (variableType === "int") {
 			if (digits.indexOf(nextTokenValue) > -1) {
