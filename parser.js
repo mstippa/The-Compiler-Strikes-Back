@@ -574,11 +574,11 @@ function Tree() {
     		return (this.currentNode.name);
     }
 
-    this.getLeafNode = function() {
+    this.getLeafNode2 = function() {
     	return (this.currentNode.children[1].name);
     }
 
-    this.getLeafNodeType = function() {
+    this.getLeafNode1 = function() {
     	return (this.currentNode.children[0].name);
     }
 
