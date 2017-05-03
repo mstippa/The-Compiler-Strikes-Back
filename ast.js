@@ -142,17 +142,20 @@ function parseBooleanExpr2() {
 
 function parseExpr2() {
 	if (chars.indexOf(currentTokenValue) > -1) {
-			astTree.addNode(currentTokenValue, "leaf");
-			match2(); // the id
-			//match2(); // the boolop
-			parseExpr2();
+		astTree.addNode(currentTokenValue, "leaf");
+		match2(); // the id
+		//match2(); // the boolop
+		parseExpr2();
 	} else if (digits.indexOf(currentTokenValue) > -1) {
 		if (tokens[parseIndex2+1][1] === "+") {
 			astTree.addNode("+", "branch");
 			astTree.addNode(currentTokenValue,  "leaf");
 			match2(); // the digit
 			match2(); // the +
-			parseExpr2();
+			parseExpr2(); 
+		} else if (tokens[parseIndex2+2][1] === "=") {
+			astTree.addNode(currentTokenValue, "leaf");
+			match2(); // the digit	
 		} else {
 			astTree.addNode(currentTokenValue, "leaf");
 			match2(); // the digit
