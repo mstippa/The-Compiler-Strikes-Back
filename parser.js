@@ -578,6 +578,9 @@ function Tree() {
     	return (this.currentNode.children[1].name);
     }
 
+    this.getLeafNodeType = function() {
+    	return (this.currentNode.children[0].name);
+    }
 
     // Add a node: kind in {branch, leaf}.
     this.addNode = function(name, kind) {
