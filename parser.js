@@ -12,6 +12,7 @@ var errorCounter = 0;
 var cstTree = new Tree();
 var astTree = new Tree();
 var parseIndex2 = 0;
+var currentNode = 0;
 
 // updates the parseIndex
 // moves the "pointer" ahead
@@ -42,7 +43,8 @@ function parse () {
 	cstTree.endChildren();
 	displayParseOutcome();
 	parse2();
-	parse3(); 
+	parse3();
+	generateCode(); 
 	if (currentTokenValue === "$" && tokens[parseIndex+1] !== undefined) {
 		parseIndex++;
 		parseIndex2++;
@@ -555,11 +557,27 @@ function Tree() {
     this.root = null;  // Note the NULL root node of this Tree.
     this.cur = {};     // Note the EMPTY current node of the Tree we're building.
     this.traversalDepth = 0;
-
+    this.currentNode = "";
 
     // -- ------- --
     // -- Methods --
     // -- ------- --
+
+
+    this.numRootChildren = function() {
+    	return this.root.children.length;
+    }
+
+    this.getBranchNode = function() {
+    		currentNode++;
+    		this.currentNode = this.root.children[currentNode-1]
+    		return (this.currentNode.name);
+    }
+
+    this.getLeafNode = function() {
+    	return (this.currentNode.children[1].name);
+    }
+
 
     // Add a node: kind in {branch, leaf}.
     this.addNode = function(name, kind) {
