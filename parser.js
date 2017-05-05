@@ -12,7 +12,7 @@ var errorCounter = 0;
 var cstTree = new Tree();
 var astTree = new Tree();
 var parseIndex2 = 0;
-var currentNode = 0;
+var currentNodeCounter = 0;
 
 // updates the parseIndex
 // moves the "pointer" ahead
@@ -563,13 +563,32 @@ function Tree() {
     // -- ------- --
 
 
+    this.getIntop1 = function(nodeName) {
+    	if (nodeName === "Print") {
+    		var lowerBranchNode = this.currentNode.children[0];
+    	} else if (nodeName === "Assign") {
+    		console.log("dick");
+    		var lowerBranchNode = this.currentNode.children[1];
+    	}	
+    	return (lowerBranchNode.children[0].name);
+    }
+
+    this.getIntop2 = function(nodeName) {
+    	if (nodeName === "Print") {
+    		var lowerBranchNode = this.currentNode.children[0];
+    	} else if (nodeName === "Assign") {	
+    		var lowerBranchNode = this.currentNode.children[1];
+    	}	
+    	return (lowerBranchNode.children[1].name);
+    }
+
     this.numRootChildren = function() {
     	return this.root.children.length;
     }
 
-    this.getBranchNode = function() {
-    		currentNode++;
-    		this.currentNode = this.root.children[currentNode-1];
+    this.getBranchNodeOfRoot = function() {
+    		currentNodeCounter++;
+    		this.currentNode = this.root.children[currentNodeCounter-1];
     		console.log(this.currentNode);
     		return (this.currentNode.name);
     }
