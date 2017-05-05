@@ -44,7 +44,7 @@ function parse () {
 	displayParseOutcome();
 	parse2();
 	parse3();
-	generateCode(); 
+	driver(); 
 	if (currentTokenValue === "$" && tokens[parseIndex+1] !== undefined) {
 		parseIndex++;
 		parseIndex2++;
@@ -114,7 +114,6 @@ function parseBlock() {
 					if (currentTokenValue === "}") {
 						if (tokens[parseIndex+1][1] === "$") {
 							var treeDepth = cstTree.countDepth();
-							console.log(cstTree.countDepth());
 							while (treeDepth > 5) {
 								cstTree.endChildren();
 								treeDepth--;
@@ -570,7 +569,8 @@ function Tree() {
 
     this.getBranchNode = function() {
     		currentNode++;
-    		this.currentNode = this.root.children[currentNode-1]
+    		this.currentNode = this.root.children[currentNode-1];
+    		console.log(this.currentNode);
     		return (this.currentNode.name);
     }
 
