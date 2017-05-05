@@ -13,6 +13,7 @@ var cstTree = new Tree();
 var astTree = new Tree();
 var parseIndex2 = 0;
 var currentNodeCounter = 0;
+var branchNodeCounter = 0;
 
 // updates the parseIndex
 // moves the "pointer" ahead
@@ -563,18 +564,18 @@ function Tree() {
     // -- ------- --
 
 
+
     this.getIntop1 = function(nodeName) {
-    	if (nodeName === "Print") {
+    	if (nodeName === "Print" || nodeName === "if") {
     		var lowerBranchNode = this.currentNode.children[0];
     	} else if (nodeName === "Assign") {
-    		console.log("dick");
     		var lowerBranchNode = this.currentNode.children[1];
     	}	
     	return (lowerBranchNode.children[0].name);
     }
 
     this.getIntop2 = function(nodeName) {
-    	if (nodeName === "Print") {
+    	if (nodeName === "Print" || nodeName === "if") {
     		var lowerBranchNode = this.currentNode.children[0];
     	} else if (nodeName === "Assign") {	
     		var lowerBranchNode = this.currentNode.children[1];
@@ -587,10 +588,16 @@ function Tree() {
     }
 
     this.getBranchNodeOfRoot = function() {
-    		currentNodeCounter++;
-    		this.currentNode = this.root.children[currentNodeCounter-1];
-    		console.log(this.currentNode);
-    		return (this.currentNode.name);
+    	console.log(this.numRootChildren());
+    	console.log(branchNodeCounter);
+    	if (branchNodeCounter < this.numRootChildren()) {
+			currentNodeCounter++;
+			this.currentNode = this.root.children[currentNodeCounter-1];
+			branchNodeCounter++;
+			return (this.currentNode.name);
+		}
+		console.log("dick"); 
+		return "done";	
     }
 
     this.getLeafNode2 = function() {
