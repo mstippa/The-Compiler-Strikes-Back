@@ -9,6 +9,9 @@ var staticTable = [];
 var staticTableCounter = 0;
 var tempCounter = -1; // -1 instead of 0 because of the base case
 var idAddress = "";
+var jumpCounter = 0;
+var jumpCounterArray = [];
+var nodeName = "";
 
 
 function driver() {
@@ -29,49 +32,62 @@ function addCode () {
 
 // generates the code
 function generateCode() {
-	var i = 0;
-	var nodeName = "";
-	while (i < astTree.numRootChildren()) {
-		nodeName = astTree.getBranchNodeOfRoot();
-		if (nodeName === "VarDecl") {
-			tempCounter++;
-			lineCode = ["A9","00","8D","T"+tempCounter, "XX"];
+	nodeName = astTree.getBranchNodeOfRoot();
+	if (nodeName === "VarDecl") {
+		tempCounter++;
+		lineCode = ["A9","00","8D","T"+tempCounter, "XX"];
+		addCode();
+		staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1(), 0];
+		staticTableCounter++;
+		generateCode();
+	} else if (nodeName === "Assign") {
+		// checking for a digit
+		if (digits.indexOf(astTree.getLeafNode2()) > -1) {
+			lineCode = ["A9","0"+astTree.getLeafNode2(), "8D", "T"+tempCounter,"XX"];
 			addCode();
-			staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1(), 0];
-			staticTableCounter++;
-		} else if (nodeName === "Assign") {
-			// checking for a digit
-			if (digits.indexOf(astTree.getLeafNode2()) > -1) {
-				lineCode = ["A9","0"+astTree.getLeafNode2(), "8D", "T"+tempCounter,"XX"];
-				addCode();
-			} else if(astTree.getLeafNode2() === "+") {
-				addition(nodeName);
-			// if here then we have found an id
-			} else {
-				var n = 0;
-				// looping to find the temporary address of an identifier, only looking for ids at the moment
-				while (n < staticTable.length) {
-					if (staticTable[n][1] === astTree.getLeafNode2() && staticTable[n][2] === "int") {
-						idAddress = addressLookUp(astTree.getLeafNode1());
-						lineCode = ["AD", staticTable[n][0], "XX", "8D", idAddress, "XX" ];
-						addCode();	
-					}
-					n++;
+		} else if(astTree.getLeafNode2() === "+") {
+			addition(nodeName);
+		// if here then we have found an id
+		} else {
+			var n = 0;
+			// looping to find the temporary address of an identifier, only looking for ids at the moment
+			while (n < staticTable.length) {
+				if (staticTable[n][1] === astTree.getLeafNode2() && staticTable[n][2] === "int") {
+					idAddress = addressLookUp(astTree.getLeafNode1());
+					lineCode = ["AD", staticTable[n][0], "XX", "8D", idAddress, "XX" ];
+					addCode();	
 				}
+				n++;
 			}
-		} else if (nodeName === "print") {
-			console.log(astTree.getLeafNode1());
-			// checking for a char
-			if (chars.indexOf(astTree.getLeafNode1()) > -1 && astTree.getLeafNode1().length < 2) {
-				idAddress = addressLookUp(astTree.getLeafNode1());
-				lineCode = ["AC", idAddress,"XX", "A2", "01", "FF"];
-				addCode();	
-			} else if (astTree.getLeafNode1() === "+") {
-				lineCode = addition(nodeName);
-				addCode();
-			} 		
 		}
-		i++;
+		generateCode();
+	} else if (nodeName === "print") {
+		// checking for a char
+		if (chars.indexOf(astTree.getLeafNode1()) > -1 && astTree.getLeafNode1().length < 2) {
+			idAddress = addressLookUp(astTree.getLeafNode1());
+			lineCode = ["AC", idAddress,"XX", "A2", "01", "FF"];
+			addCode();	
+		} else if (astTree.getLeafNode1() === "+") {
+			lineCode = addition(nodeName);
+			addCode();
+		} 
+		generateCode();		
+	} else if (nodeName === "if") {
+		if (chars.indexOf(astTree.getIntop1()) > -1) {
+			idAddress = addressLookUp(astTree.getIntop1()); // get the address of the first id being compared
+			lineCode = ["AE", idAddress, "XX", "EC"];
+			if (chars.indexOf(astTree.getIntop2()) > -1) {
+				idAddress = addressLookUp(astTree.getIntop2()); // get the address of the second id being compared
+				lineCode = lineCode.concat([idAddress, "XX", "D0", "J"+jumpCounter.toString()]);
+			}	 
+		}
+
+
+		// jumpCounterArray[jumpCounter] = lineCode.length
+		// addCode();
+		generateCode();
+	} else if (nodeName === "done") {
+		// do nothing
 	}
 	generatedCode = generatedCode.concat("00");
 	//console.log(generatedCode);	
@@ -109,6 +125,11 @@ function staticVariables() {
 }
 
 
+function calcJump() {
+
+}
+
+
 // returns the temporary address of an id
 function addressLookUp(id) {
 	var m = 0;
@@ -129,7 +150,7 @@ function displayCode() {
 	}
 }
 
-
+// generates the code when an intop is in the source code
 function addition(branch) {
 	if (branch === "print") {
 		if (digits.indexOf(astTree.getIntop1(branch)) > -1 && digits.indexOf(astTree.getIntop2(branch)) > -1) {
