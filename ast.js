@@ -152,7 +152,8 @@ function parseExpr2() {
 			astTree.addNode(currentTokenValue,  "leaf");
 			match2(); // the digit
 			match2(); // the +
-			parseExpr2(); 
+			parseExpr2();
+			astTree.endChildren(); 
 		} else if (tokens[parseIndex2+2][1] === "=") {
 			astTree.addNode(currentTokenValue, "leaf");
 			match2(); // the digit	
