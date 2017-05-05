@@ -4,6 +4,7 @@
 
 // global variables
 var generatedCode = [];
+var generatedCodeCounter = 0;
 var lineCode = [];
 var staticTable = [];
 var staticTableCounter = 0;
@@ -11,34 +12,54 @@ var tempCounter = -1; // -1 instead of 0 because of the base case
 var idAddress = "";
 var jumpCounter = 0;
 var jumpCounterArray = [];
+var jumDistance = 0;
 var nodeName = "";
+var heapCode = ["00"];
+var codGenScope = 0;
+var string = "";
+var convertedStringArray = [];
 
 
+// driver function
 function driver() {
+	nodeName = astTree.getBranchNodeOfRoot();
 	generateCode(); // generate the code with temporary addresses
 	staticVariables(); // replace the temporary addresses
+	fillInCode();
 	displayCode(); // display the code
 }
 
 
 // adds the new line of codes to the executable image
 function addCode () {
-	if (generatedCode.length === 0) {
-		generatedCode = lineCode;
-	} else {
-		generatedCode = generatedCode.concat(lineCode);
+	var j = 0;
+	while (j < lineCode.length) {
+		generatedCode[generatedCodeCounter] = lineCode[j];
+		generatedCodeCounter++;
+		j++;
 	}
+	// 	if (generatedCode[0] === undefined) {
+	// 		generatedCode = lineCode;
+	// 	} else {
+	// 		generatedCode = generatedCode.concat(lineCode);
+	// 	}
+	// }	
 }
 
 // generates the code
 function generateCode() {
-	nodeName = astTree.getBranchNodeOfRoot();
 	if (nodeName === "VarDecl") {
-		tempCounter++;
-		lineCode = ["A9","00","8D","T"+tempCounter, "XX"];
-		addCode();
-		staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1(), 0];
-		staticTableCounter++;
+		if (astTree.getLeafNode1() === "int") {
+			tempCounter++;
+			lineCode = ["A9","00","8D","T"+tempCounter, "XX"];
+			addCode();
+			staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1()];
+			staticTableCounter++;
+		} else if (astTree.getLeafNode1() === "string") {
+			tempCounter++;
+			staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1()];
+		}
+		nodeName = astTree.getBranchNodeOfRoot();	
 		generateCode();
 	} else if (nodeName === "Assign") {
 		// checking for a digit
@@ -48,9 +69,9 @@ function generateCode() {
 		} else if(astTree.getLeafNode2() === "+") {
 			addition(nodeName);
 		// if here then we have found an id
-		} else {
+		} else if (chars.indexOf(astTree.getLeafNode2()) > -1 && astTree.getLeafNode2().length < 2) {
 			var n = 0;
-			// looping to find the temporary address of an identifier, only looking for ids at the moment
+			// looping to find the temporary address of an identifier
 			while (n < staticTable.length) {
 				if (staticTable[n][1] === astTree.getLeafNode2() && staticTable[n][2] === "int") {
 					idAddress = addressLookUp(astTree.getLeafNode1());
@@ -59,7 +80,26 @@ function generateCode() {
 				}
 				n++;
 			}
+		// if here then we have a boolean or a string	
+		} else {
+			// checking for a boolean
+			if (astTree.getLeafNode2() === "true" || astTree.getLeafNode2() === "false") {
+
+			// if here then we have a string
+			} else {
+				string = astTree.getLeafNode2();
+				convertedStringArray = replaceString(string);
+				stringToHeap(); // add the string to the heap array
+				var stringLocation = addHeapToGeneratedCode(); // add what's in the heap array to the generated code and the location of the start of the array is returned
+				stringLocation = stringLocation.toString(16); // convert to hex
+				stringLocation = stringLocation.toUpperCase(); // make it uppercase
+				heapCode = ["00"]; // reset the heap array
+				idAddress = addressLookUp(astTree.getLeafNode1());
+				lineCode = ["A9", stringLocation, "8D", idAddress, "XX"];
+				addCode();
+			}
 		}
+		nodeName = astTree.getBranchNodeOfRoot();
 		generateCode();
 	} else if (nodeName === "print") {
 		// checking for a char
@@ -70,28 +110,31 @@ function generateCode() {
 		} else if (astTree.getLeafNode1() === "+") {
 			lineCode = addition(nodeName);
 			addCode();
-		} 
+		}
+		nodeName = astTree.getBranchNodeOfRoot(); 
 		generateCode();		
 	} else if (nodeName === "if") {
+		// checking if the first part of the expr is a char
 		if (chars.indexOf(astTree.getIntop1()) > -1) {
 			idAddress = addressLookUp(astTree.getIntop1()); // get the address of the first id being compared
 			lineCode = ["AE", idAddress, "XX", "EC"];
+			// checking if the second part of the expr is a char
 			if (chars.indexOf(astTree.getIntop2()) > -1) {
 				idAddress = addressLookUp(astTree.getIntop2()); // get the address of the second id being compared
 				lineCode = lineCode.concat([idAddress, "XX", "D0", "J"+jumpCounter.toString()]);
+				jumpCounter++;
+				addCode();
+				generateCode();
 			}	 
 		}
-
-
-		// jumpCounterArray[jumpCounter] = lineCode.length
-		// addCode();
 		generateCode();
 	} else if (nodeName === "done") {
-		// do nothing
+		// traversal complete
 	}
-	generatedCode = generatedCode.concat("00");
 	//console.log(generatedCode);	
 }
+
+
 
 // finds the static position in hexadecimal
 function findStaticPosition(codeLength) {
@@ -104,9 +147,75 @@ function findStaticPosition(codeLength) {
 	}
 }
 
+// finds ordinal values for characters in string and converts them to hexadecimal
+function replaceString(string) {
+	var heapString = [];
+	var p = 0;
+	// converts a string to hexadecimal and puts in into an array
+	while (p < string.length) {
+		heapString[p] = string.charCodeAt(p);
+		heapString[p] = heapString[p].toString(16);
+		p++;
+	}
+	return heapString;
+}
+
+
+function stringToHeap() {
+	var k = convertedStringArray.length - 1;
+	while (k >= 0) {
+		heapCode.unshift(convertedStringArray[k]);
+		k--;
+	}
+}
+
+// this adds what is currently in the heap array to the generatedCode array
+function addHeapToGeneratedCode() {
+	var y = 255;
+	// checking if any strings have been added to the heap yet
+	if (generatedCode[y] === undefined) {
+		var k = heapCode.length - 1;
+		while (k > -1) {
+			generatedCode[y] = heapCode[k];
+			y--;
+			k--;
+		}
+		console.log(generatedCode);
+		return y;
+	// if here then strings have been added to the heap already
+	} else {
+		while (y > 0) {
+			if (generateCode[y].length === 2) {
+				// move back to the next location
+			} else {
+				var k = heapCode.length - 1;
+				while (k => 0) {
+					generateCode[y] = heapCode[k];
+					y--;
+					k--;
+				}
+				return y; 
+			}
+			y--;
+		}
+	}
+}
+
 // replaces all the temporary addresses with static addresses 
 function staticVariables() {
-	var codeLength = generatedCode.length+1; // add one more to the length of the code to find the start of the static area
+	var h = 0;
+	var codeLength = 0;
+	while (h < 255) {
+		if (generatedCode[h] !== undefined) {
+			// haven't found static area yet
+		} else {
+			generatedCode[h] = "00";
+			h++;
+			codeLength = h;
+			break;
+		}
+		h++;
+	}
 	var staticPositionHex = findStaticPosition(codeLength);
 	var i = 0;
 	while (i <= tempCounter) {
@@ -140,6 +249,28 @@ function addressLookUp(id) {
 		m++;	
 	}
 }
+
+
+function scopeLookUp(id) {
+
+}
+
+
+function typeLookUp(id) {
+
+}
+
+
+function fillInCode() {
+	var i = 0;
+	while (i < generatedCode.length) {
+		if (generatedCode[i] === undefined) {
+			generatedCode[i] = "00";
+		}
+		i++;
+	}
+}
+
 
 // displays the code
 function displayCode() {
