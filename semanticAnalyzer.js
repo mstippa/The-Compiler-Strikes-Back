@@ -1,5 +1,5 @@
 /*
-* This file creates an Abstract Syntax Tree by reparsing the tokens
+* This file semantically analyzes the source code by reparsing the tokens
 */
 
 // global variables 
@@ -285,6 +285,7 @@ function findType (identifier) {
 		while (findTypeIndex < identifiers.length) {
 			if (identifier === identifiers[findTypeIndex]) {
 				if (identifiers[findTypeIndex+1] === scope) {
+					console.log(checkScope(identifiers[findTypeIndex]));
 					if (checkScope(identifiers[findTypeIndex])) {
 						return(identifiers[findTypeIndex-1]);
 					} else {
@@ -336,34 +337,38 @@ function checkScope(id) {
 		if (tokens[i][1] === "if" || tokens[i][1] === "while") {
 			i++
 			while (i !== "}") {
-				if (id === tokens[i][1] && tokens[i][0] === "token_id") {
-					if (tokens[i-1][1] !== "(" || tokens[i+1][1] !== ")") {
-						if (tokens[i-1][0] === "token_string" || tokens[i-1][0] === "token_int" || tokens[i-1][0] === "token_boolean") {
-							var idType = tokens[i-1][0];
-							var n = 1;
-							if (idType === "token_string") {
-								idType = "string"
-							} else if (idType === "token_int") {
-								idType = "int"
-							} else {
-								idType = "boolean"
-							}	
-							while (n < identifiers.length) {
-								if (identifiers[n] === id && identifiers[n-1] === idType) {
-									if (identifiers[n+1] === scope) {
-										return false;
-									} else {
-										return true
+				if (tokens[i] !== undefined) {
+					if (id === tokens[i][1] && tokens[i][0] === "token_id") {
+						if (tokens[i-1][1] !== "(" || tokens[i+1][1] !== ")") {
+							if (tokens[i-1][0] === "token_string" || tokens[i-1][0] === "token_int" || tokens[i-1][0] === "token_boolean") {
+								var idType = tokens[i-1][0];
+								var n = 1;
+								if (idType === "token_string") {
+									idType = "string"
+								} else if (idType === "token_int") {
+									idType = "int"
+								} else {
+									idType = "boolean"
+								}	
+								while (n < identifiers.length) {
+									if (identifiers[n] === id && identifiers[n-1] === idType) {
+										if (identifiers[n+1] === scope) {
+											return false;
+										} else {
+											return true
+										}
 									}
-								}
-								n++; 
-							}			
-						} else {
-							return true;
-						}
-					}		
+									n++; 
+								}			
+							} else {
+								return true;
+							}
+						}		
+					}
+					i++;
+				} else {
+					return true;
 				}
-				i++;
 			}
 			return true;	
 		}
