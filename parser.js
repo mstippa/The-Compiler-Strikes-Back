@@ -14,6 +14,8 @@ var astTree = new Tree();
 var parseIndex2 = 0;
 var currentNodeCounter = 0;
 var branchNodeCounter = 0;
+var newBranchNodeCounter = 0;
+var newBlockCurrentNodeCounter = 0;
 
 // updates the parseIndex
 // moves the "pointer" ahead
@@ -557,7 +559,8 @@ function Tree() {
     this.root = null;  // Note the NULL root node of this Tree.
     this.cur = {};     // Note the EMPTY current node of the Tree we're building.
     this.traversalDepth = 0;
-    this.currentNode = "";
+    this.currentBranchNode = "";
+    this.newCurrentBranchNode = "";
 
     // -- ------- --
     // -- Methods --
@@ -567,18 +570,18 @@ function Tree() {
 
     this.getIntop1 = function(nodeName) {
     	if (nodeName === "Print" || nodeName === "if") {
-    		var lowerBranchNode = this.currentNode.children[0];
+    		var lowerBranchNode = this.currentBranchNode.children[0];
     	} else if (nodeName === "Assign") {
-    		var lowerBranchNode = this.currentNode.children[1];
+    		var lowerBranchNode = this.currentBranchNode.children[1];
     	}	
     	return (lowerBranchNode.children[0].name);
     }
 
     this.getIntop2 = function(nodeName) {
     	if (nodeName === "Print" || nodeName === "if") {
-    		var lowerBranchNode = this.currentNode.children[0];
+    		var lowerBranchNode = this.currentBranchNode.children[0];
     	} else if (nodeName === "Assign") {	
-    		var lowerBranchNode = this.currentNode.children[1];
+    		var lowerBranchNode = this.currentBranchNode.children[1];
     	}	
     	return (lowerBranchNode.children[1].name);
     }
@@ -588,25 +591,96 @@ function Tree() {
     }
 
     this.getBranchNodeOfRoot = function() {
-    	console.log(this.numRootChildren());
-    	console.log(branchNodeCounter);
-    	if (branchNodeCounter < this.numRootChildren()) {
-			currentNodeCounter++;
-			this.currentNode = this.root.children[currentNodeCounter-1];
-			branchNodeCounter++;
-			return (this.currentNode.name);
-		}
-		console.log("dick"); 
-		return "done";	
+    	//console.log(this.currentBranchNode.name);
+    	if (this.currentBranchNode.name !== "if" || codeGenScope === 0) {
+	    	if (branchNodeCounter < this.numRootChildren()) {
+	    		if (codeGenScope === 0) {
+					currentNodeCounter++;
+					this.currentBranchNode = this.root.children[currentNodeCounter-1];
+					branchNodeCounter++;
+					if (this.currentBranchNode.name !== "Block") {
+						return (this.currentBranchNode.name);
+					} else {
+						newBranchNodeCounter = currentNodeCounter;
+						return (this.currentBranchNode.name);
+					}	
+				} else {
+					newBlockCurrentNodeCounter = currentNodeCounter;
+					currentNodeCounter = 0;
+					getBranchNode();
+				}		
+			}
+			return "done";
+		} else {
+			newBlockCurrentNodeCounter = currentNodeCounter;
+			currentNodeCounter = 0;
+			if (this.currentBranchNode.name === "if") {
+    			this.currentBranchNode = this.currentBranchNode.children[1];
+    		}
+    		if (newBranchNodeCounter < this.currentBranchNode.children.length) {
+    			currentNodeCounter++;
+    			this.currentBranchNode = this.currentBranchNode.children[currentNodeCounter-1];
+    			newBranchNodeCounter++;
+    			console.log(this.currentBranchNode.name);
+    			return(this.currentBranchNode.name);
+    		} else {
+    			codeGenScope--;
+    			currentNodeCounter = newBlockCurrentNodeCounter;
+    			return "branch done";
+    		}
+		}		
     }
 
     this.getLeafNode2 = function() {
-    	return (this.currentNode.children[1].name);
+    	return (this.currentBranchNode.children[1].name);
     }
 
     this.getLeafNode1 = function() {
-    	return (this.currentNode.children[0].name);
+    	return (this.currentBranchNode.children[0].name);
     }
+
+
+    this.getBranchNode = function() {
+    	if (this.currentBranchNode.name === "if") {
+    		this.currentBranchNode = this.currentBranchNode.children[1];
+    	}
+    	if (newBranchNodeCounter < this.currentBranchNode.children.length) {
+    		currentNodeCounter++;
+    		this.currentBranchNode = this.currentBranchNode.children[currentNodeCounter-1];
+    		newBranchNodeCounter++;
+    		console.log(this.currentBranchNode.name);
+    		return(this.currentBranchNode.name);
+    	} else {
+    		codeGenScope--;
+    		currentNodeCounter = newBlockCurrentNodeCounter;
+    		return "branch done";
+    	}
+    }
+
+
+
+
+
+
+
+
+    // this.getBranchNode = function() {
+    // 	if (newBranchNodeCounter < this.currentBranchNode.children.length) {
+    // 		newBlockCurrentNodeCounter++;
+    // 		this.newCurrentBranchNode = this.currentBranchNode.children[newBlockCurrentNodeCounter-1];
+    // 		newBranchNodeCounter++;
+    // 		return (this.currentBranchNode.name);
+    // 	}
+    // 	this.currentBranchNode = this.root.children[currentNodeCounter];
+    // 	currentNodeCounter--;
+    // 	return "branch complete";
+    // }
+
+    // this.ifNode = function() {
+
+    // }
+
+
 
     // Add a node: kind in {branch, leaf}.
     this.addNode = function(name, kind) {
