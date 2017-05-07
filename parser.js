@@ -566,22 +566,85 @@ function Tree() {
     // -- Methods --
     // -- ------- --
 
+    this.getBranchNodeOfRoot = function() {
+    	if (this.currentBranchNode.name !== "if" && this.currentBranchNode.name !== "while" && codeGenScope === 0 && this.currentBranchNode.name !== "Block") {
+	    	if (branchNodeCounter < this.numRootChildren()) {
+	    		if (codeGenScope === 0) {
+					currentNodeCounter++;
+					this.currentBranchNode = this.root.children[currentNodeCounter-1];
+					branchNodeCounter++;
+					return (this.currentBranchNode.name);
+				}	
+			}
+			return "done";
+		} else {
+			//newBlockCurrentNodeCounter = currentNodeCounter;
+			// currentNodeCounter = 0;
+			if (this.currentBranchNode.name === "if" || this.currentBranchNode.name === "while") {
+    			this.currentBranchNode = this.currentBranchNode.children[1];
+    		}
+    		console.log(newBranchNodeCounter);
+    		console.log(this.currentBranchNode.children.length);
+    		if (newBranchNodeCounter < this.currentBranchNode.children.length) {
+    			newBlockCurrentNodeCounter++;
+    			this.newCurrentBranchNode = this.currentBranchNode.children[newBlockCurrentNodeCounter-1];
+    			newBranchNodeCounter++;
+    			console.log(this.newCurrentBranchNode.name);
+    			return(this.newCurrentBranchNode.name);
+    		} else {
+    			codeGenScope--;
+    			//currentNodeCounter = newBlockCurrentNodeCounter;
+    			return "branch done";
+    		}
+		}		
+    }
 
+    this.getLeafNode2 = function() {
+    	if (this.currentBranchNode.name === "Block") {
+    		return (this.newCurrentBranchNode.children[1].name);
+    	} else {	
+    		return (this.currentBranchNode.children[1].name);
+    	}	
+    }
+
+    this.getLeafNode1 = function() {
+    	if (this.currentBranchNode.name === "Block") {
+    		return (this.newCurrentBranchNode.children[0].name);
+    	} else {	
+    		return (this.currentBranchNode.children[0].name);
+    	}
+    }
 
     this.getIntop1 = function(nodeName) {
-    	if (nodeName === "Print" || nodeName === "if") {
-    		var lowerBranchNode = this.currentBranchNode.children[0];
+    	if (nodeName === "Print" || nodeName === "if" || nodeName === "while") {
+    		if (this.currentBranchNode.name === "Block") {
+    			var lowerBranchNode = this.newCurrentBranchNode.children[0];
+    		} else {
+    			var lowerBranchNode = this.currentBranchNode.children[0];
+    		}	
     	} else if (nodeName === "Assign") {
-    		var lowerBranchNode = this.currentBranchNode.children[1];
+    		if (this.currentBranchNode.name === "Block") {
+    			var lowerBranchNode = this.newCurrentBranchNode.children[1];
+    		} else {
+    			var lowerBranchNode = this.currentBranchNode.children[1];
+    		}
     	}	
     	return (lowerBranchNode.children[0].name);
     }
 
     this.getIntop2 = function(nodeName) {
-    	if (nodeName === "Print" || nodeName === "if") {
-    		var lowerBranchNode = this.currentBranchNode.children[0];
+    	if (nodeName === "Print" || nodeName === "if" || nodeName === "while") {
+    		if (this.currentBranchNode.name === "Block") {
+    			var lowerBranchNode = this.newCurrentBranchNode.children[0];
+    		} else {
+    			var lowerBranchNode = this.currentBranchNode.children[0];
+    		}
     	} else if (nodeName === "Assign") {	
-    		var lowerBranchNode = this.currentBranchNode.children[1];
+    		if (this.currentBranchNode.name === "Block") {
+    			var lowerBranchNode = this.newCurrentBranchNode.children[1];
+    		} else {
+    			var lowerBranchNode = this.currentBranchNode.children[1];
+    		}
     	}	
     	return (lowerBranchNode.children[1].name);
     }
@@ -589,98 +652,6 @@ function Tree() {
     this.numRootChildren = function() {
     	return this.root.children.length;
     }
-
-    this.getBranchNodeOfRoot = function() {
-    	//console.log(this.currentBranchNode.name);
-    	if (this.currentBranchNode.name !== "if" || codeGenScope === 0) {
-	    	if (branchNodeCounter < this.numRootChildren()) {
-	    		if (codeGenScope === 0) {
-					currentNodeCounter++;
-					this.currentBranchNode = this.root.children[currentNodeCounter-1];
-					branchNodeCounter++;
-					if (this.currentBranchNode.name !== "Block") {
-						return (this.currentBranchNode.name);
-					} else {
-						newBranchNodeCounter = currentNodeCounter;
-						return (this.currentBranchNode.name);
-					}	
-				} else {
-					newBlockCurrentNodeCounter = currentNodeCounter;
-					currentNodeCounter = 0;
-					getBranchNode();
-				}		
-			}
-			return "done";
-		} else {
-			newBlockCurrentNodeCounter = currentNodeCounter;
-			currentNodeCounter = 0;
-			if (this.currentBranchNode.name === "if") {
-    			this.currentBranchNode = this.currentBranchNode.children[1];
-    		}
-    		if (newBranchNodeCounter < this.currentBranchNode.children.length) {
-    			currentNodeCounter++;
-    			this.currentBranchNode = this.currentBranchNode.children[currentNodeCounter-1];
-    			newBranchNodeCounter++;
-    			console.log(this.currentBranchNode.name);
-    			return(this.currentBranchNode.name);
-    		} else {
-    			codeGenScope--;
-    			currentNodeCounter = newBlockCurrentNodeCounter;
-    			return "branch done";
-    		}
-		}		
-    }
-
-    this.getLeafNode2 = function() {
-    	return (this.currentBranchNode.children[1].name);
-    }
-
-    this.getLeafNode1 = function() {
-    	return (this.currentBranchNode.children[0].name);
-    }
-
-
-    this.getBranchNode = function() {
-    	if (this.currentBranchNode.name === "if") {
-    		this.currentBranchNode = this.currentBranchNode.children[1];
-    	}
-    	if (newBranchNodeCounter < this.currentBranchNode.children.length) {
-    		currentNodeCounter++;
-    		this.currentBranchNode = this.currentBranchNode.children[currentNodeCounter-1];
-    		newBranchNodeCounter++;
-    		console.log(this.currentBranchNode.name);
-    		return(this.currentBranchNode.name);
-    	} else {
-    		codeGenScope--;
-    		currentNodeCounter = newBlockCurrentNodeCounter;
-    		return "branch done";
-    	}
-    }
-
-
-
-
-
-
-
-
-    // this.getBranchNode = function() {
-    // 	if (newBranchNodeCounter < this.currentBranchNode.children.length) {
-    // 		newBlockCurrentNodeCounter++;
-    // 		this.newCurrentBranchNode = this.currentBranchNode.children[newBlockCurrentNodeCounter-1];
-    // 		newBranchNodeCounter++;
-    // 		return (this.currentBranchNode.name);
-    // 	}
-    // 	this.currentBranchNode = this.root.children[currentNodeCounter];
-    // 	currentNodeCounter--;
-    // 	return "branch complete";
-    // }
-
-    // this.ifNode = function() {
-
-    // }
-
-
 
     // Add a node: kind in {branch, leaf}.
     this.addNode = function(name, kind) {
