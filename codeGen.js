@@ -12,7 +12,6 @@ var tempCounter = -1; // -1 instead of 0 because of the base case
 var idAddress = "";
 var jumpCounter = 0;
 var jumpCounterArray = [];
-var jumDistance = 0;
 var nodeName = "";
 var heapCode = ["00"];
 var codGenScope = 0;
@@ -21,6 +20,7 @@ var convertedStringArray = [];
 var xregisterCounter = 1;
 var codeGenScope = 0;
 var lineCodeLength = 0;
+var stringLocation = 0;
 
 
 // driver function
@@ -62,13 +62,15 @@ function generateCode() {
 		} else if (astTree.getLeafNode1() === "string" || "boolean") {
 			tempCounter++;
 			staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1(), codeGenScope];
+			staticTableCounter++;
 		}
 		nodeName = astTree.getBranchNodeOfRoot();	
 		generateCode();
 	} else if (nodeName === "Assign") {
 		// checking for a digit
 		if (digits.indexOf(astTree.getLeafNode2()) > -1) {
-			lineCode = ["A9","0"+astTree.getLeafNode2(), "8D", "T"+tempCounter,"XX"];
+			idAddress = addressLookUp(astTree.getLeafNode1())
+			lineCode = ["A9","0"+astTree.getLeafNode2(), "8D", idAddress,"XX"];
 			addValueToStaticTable(astTree.getLeafNode1(),astTree.getLeafNode2()); // add the value to the static table
 			lineCodeLength = lineCodeLength + lineCode.length;
 			addCode();
@@ -92,11 +94,12 @@ function generateCode() {
 			string = astTree.getLeafNode2();
 			convertedStringArray = replaceString(string);
 			stringToHeap(); // add the string to the heap array
-			var stringLocation = addHeapToGeneratedCode(); // add what's in the heap array to the generated code and the location of the start of the array is returned
+			stringLocation = addHeapToGeneratedCode(); // add what's in the heap array to the generated code and the location of the start of the array is returned
 			stringLocation = stringLocation.toString(16); // convert to hex
 			stringLocation = stringLocation.toUpperCase(); // make it uppercase
 			heapCode = ["00"]; // reset the heap array
 			idAddress = addressLookUp(astTree.getLeafNode1());
+			console.log(idAddress);
 			lineCode = ["A9", stringLocation, "8D", idAddress, "XX"];
 			lineCodeLength = lineCodeLength + lineCode.length;
 			addCode();
@@ -367,12 +370,12 @@ function addHeapToGeneratedCode() {
 	// if here then strings have been added to the heap already
 	} else {
 		while (y > 0) {
-			if (generateCode[y].length === 2) {
+			if (generatedCode[y] !== undefined) {
 				// move back to the next location
 			} else {
 				var k = heapCode.length - 1;
-				while (k => 0) {
-					generateCode[y] = heapCode[k];
+				while (k >= 0) {
+					generatedCode[y] = heapCode[k];
 					y--;
 					k--;
 				}
@@ -430,7 +433,7 @@ function calcJump() {
 					generatedCode[i] = jumpDistance.toString(16);
 					break;
 				} else {
-					generatedCode[i] = "0"+jumDistance.toString(16);
+					generatedCode[i] = "0"+jumpDistance.toString(16);
 					break;
 				}
 			}
@@ -442,6 +445,7 @@ function calcJump() {
 
 // returns the temporary address of an id
 function addressLookUp(id) {
+	console.log(id);
 	var m = 0;
 	var highestScope = -1;
 	var highestScopeId = "";
@@ -486,17 +490,21 @@ function fillInCode() {
 		}
 		i++;
 	}
-	console.log(generatedCode.length);
 }
 
 
 // displays the code
 function displayCode() {
-	var i = 0;
-	while (i < generatedCode.length) {
-		document.getElementById("codeGen").innerHTML += generatedCode[i] + " ";
-		i++;
-	}
+	if (generatedCode.length < 257) {
+		var i = 0;
+		while (i < generatedCode.length) {
+			document.getElementById("codeGen").innerHTML += generatedCode[i] + " ";
+			i++;
+		}
+		document.getElementById("output").innerHTML += '<p>Code Generation complete for program '+programCounter+'</p>';
+	} else {
+		document.getElementById("output").innerHTML += '<p>Stack overflow error for program '+programCounter+'. Code not generated</p>';
+	}	
 }
 
 // generates the code when an intop is in the source code

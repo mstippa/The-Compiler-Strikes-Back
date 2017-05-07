@@ -583,8 +583,6 @@ function Tree() {
 			if (this.currentBranchNode.name === "if" || this.currentBranchNode.name === "while") {
     			this.currentBranchNode = this.currentBranchNode.children[1];
     		}
-    		console.log(newBranchNodeCounter);
-    		console.log(this.currentBranchNode.children.length);
     		if (newBranchNodeCounter < this.currentBranchNode.children.length) {
     			newBlockCurrentNodeCounter++;
     			this.newCurrentBranchNode = this.currentBranchNode.children[newBlockCurrentNodeCounter-1];
@@ -616,7 +614,7 @@ function Tree() {
     }
 
     this.getIntop1 = function(nodeName) {
-    	if (nodeName === "Print" || nodeName === "if" || nodeName === "while") {
+    	if (nodeName === "print" || nodeName === "if" || nodeName === "while") {
     		if (this.currentBranchNode.name === "Block") {
     			var lowerBranchNode = this.newCurrentBranchNode.children[0];
     		} else {
@@ -633,7 +631,7 @@ function Tree() {
     }
 
     this.getIntop2 = function(nodeName) {
-    	if (nodeName === "Print" || nodeName === "if" || nodeName === "while") {
+    	if (nodeName === "print" || nodeName === "if" || nodeName === "while") {
     		if (this.currentBranchNode.name === "Block") {
     			var lowerBranchNode = this.newCurrentBranchNode.children[0];
     		} else {

@@ -285,7 +285,6 @@ function findType (identifier) {
 		while (findTypeIndex < identifiers.length) {
 			if (identifier === identifiers[findTypeIndex]) {
 				if (identifiers[findTypeIndex+1] === scope) {
-					console.log(checkScope(identifiers[findTypeIndex]));
 					if (checkScope(identifiers[findTypeIndex])) {
 						return(identifiers[findTypeIndex-1]);
 					} else {

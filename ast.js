@@ -166,7 +166,6 @@ function parseExpr2() {
 		match2(); // the quote
 		parseStringExpr2();
 		charlist = "";
-		parseExpr2();
 	} else if (currentTokenValue === "(" || currentTokenValue === "true" || currentTokenValue === "false") {
 		parseBooleanExpr2();
 	} else if (currentTokenValue === "==" || currentTokenValue === "!=") {
@@ -184,6 +183,7 @@ function parseExpr2() {
 
 function parseStringExpr2() {
 	if (currentTokenValue === '"') {
+		console.log(charlist);
 		astTree.addNode(charlist, "leaf");
 		match2();
 	} else if (chars.indexOf(currentTokenValue) > -1 || currentTokenValue === " ") {
