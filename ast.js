@@ -173,8 +173,8 @@ function parseExpr2() {
 		match2();
 		parseExpr2();
 	} else if (currentTokenValue === "{") {
-		match2();
-		parseBlock2();
+		// match2();
+		// parseBlock2();
 	} else if (currentTokenValue === ")") {
 		match2();
 		// astTree.endChildren();
