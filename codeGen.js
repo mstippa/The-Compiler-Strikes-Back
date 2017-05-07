@@ -59,7 +59,7 @@ function generateCode() {
 			addCode();
 			staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1(), codeGenScope];
 			staticTableCounter++;
-		} else if (astTree.getLeafNode1() === "string") {
+		} else if (astTree.getLeafNode1() === "string" || "boolean") {
 			tempCounter++;
 			staticTable[staticTableCounter] = ["T"+tempCounter, astTree.getLeafNode2(), astTree.getLeafNode1(), codeGenScope];
 		}
@@ -89,23 +89,17 @@ function generateCode() {
 			}	
 		// if here then we have a boolean or a string	
 		} else {
-			// checking for a boolean
-			if (astTree.getLeafNode2() === "true" || astTree.getLeafNode2() === "false") {
-
-			// if here then we have a string
-			} else {
-				string = astTree.getLeafNode2();
-				convertedStringArray = replaceString(string);
-				stringToHeap(); // add the string to the heap array
-				var stringLocation = addHeapToGeneratedCode(); // add what's in the heap array to the generated code and the location of the start of the array is returned
-				stringLocation = stringLocation.toString(16); // convert to hex
-				stringLocation = stringLocation.toUpperCase(); // make it uppercase
-				heapCode = ["00"]; // reset the heap array
-				idAddress = addressLookUp(astTree.getLeafNode1());
-				lineCode = ["A9", stringLocation, "8D", idAddress, "XX"];
-				lineCodeLength = lineCodeLength + lineCode.length;
-				addCode();
-			}
+			string = astTree.getLeafNode2();
+			convertedStringArray = replaceString(string);
+			stringToHeap(); // add the string to the heap array
+			var stringLocation = addHeapToGeneratedCode(); // add what's in the heap array to the generated code and the location of the start of the array is returned
+			stringLocation = stringLocation.toString(16); // convert to hex
+			stringLocation = stringLocation.toUpperCase(); // make it uppercase
+			heapCode = ["00"]; // reset the heap array
+			idAddress = addressLookUp(astTree.getLeafNode1());
+			lineCode = ["A9", stringLocation, "8D", idAddress, "XX"];
+			lineCodeLength = lineCodeLength + lineCode.length;
+			addCode();
 		}
 		nodeName = astTree.getBranchNodeOfRoot();
 		generateCode();
@@ -127,37 +121,52 @@ function generateCode() {
 			addCode();
 		// checking for a digit	
 		} else if (digits.indexOf(astTree.getLeafNode1()) > -1) {
-
+			lineCode = ["A0", "0"+astTree.getLeafNode1(),"A2", "01", "FF"];
+			lineCodeLength = lineCodeLength + lineCode.length;
+			addCode();
 		// checking for a string
 		} else if (chars.indexOf(astTree.getLeafNode1()) > -1 && astTree.getLeafNode1().length > 1) {
-
+			lineCode = []
 		}
 		nodeName = astTree.getBranchNodeOfRoot(); 
 		generateCode();		
 	} else if (nodeName === "if") {
 		// checking if the first part of the expr is a char
-		if (chars.indexOf(astTree.getIntop1(nodeName)) > -1) {
+		if (chars.indexOf(astTree.getIntop1(nodeName)) > -1 && chars.indexOf(astTree.getIntop2(nodeName)) > -1) {
 			idAddress = addressLookUp(astTree.getIntop1(nodeName)); // get the address of the first id being compared
-			lineCode = ["AE", idAddress, "XX", "EC"];
+			lineCode = ["AE", idAddress, "XX"];
 			lineCodeLength = lineCodeLength + lineCode.length;
-			// checking if the second part of the expr is a char
-			if (chars.indexOf(astTree.getIntop2(nodeName)) > -1) {
-				idAddress = addressLookUp(astTree.getIntop2(nodeName)); // get the address of the second id being compared
-				lineCode = lineCode.concat([idAddress, "XX", "D0", "J"+jumpCounter.toString()]);
-				lineCodeLength = lineCodeLength + lineCode.length;
-				jumpCounter++;
-				addCode();
-				codeGenScope++;
-				nodeName = astTree.getBranchNodeOfRoot();
-				console.log(nodeName);
-				generateCode();
-				console.log(nodeName);
-				calcJump(); // calculate the distance to jump
-				lineCodeLength = 0;
-			}	 
+			idAddress = addressLookUp(astTree.getIntop2(nodeName)); // get the address of the second id being compared
+			lineCode = lineCode.concat(["EC",idAddress, "XX", "D0", "J"+jumpCounter.toString()]);
+			lineCodeLength = lineCodeLength + lineCode.length;
+			jumpCounter++;
+			addCode();
+			codeGenScope++;
+			nodeName = astTree.getBranchNodeOfRoot();
+			console.log(nodeName);
+			generateCode();
+			console.log(nodeName);
+			calcJump(); // calculate the distance to jump
+			lineCodeLength = 0;
+		} else if (digits.indexOf(astTree.getIntop2(nodeName)) > -1 || digits.indexOf(astTree.getIntop1(nodeName)) > -1) {
+			tempCounter++;
+			if (digits.indexOf(astTree.getIntop2(nodeName)) > -1) {
+				lineCode = ["A9", "0"+astTree.getIntop2(nodeName), "8D", "T"+tempCounter, "XX"];
+				idAddress = addressLookUp(astTree.getIntop1(nodeName));
+			} else {
+				lineCode = ["A9", "0"+astTree.getIntop1(nodeName), "8D", "T"+tempCounter, "XX"];
+				idAddress = addressLookUp(astTree.getIntop2(nodeName));
+			}
+			lineCode = lineCode.concat(["AE", idAddress, "XX", "EC", "T"+tempCounter, "XX", "D0", "J"+jumpCounter.toString()]);
+			lineCodeLength = lineCodeLength + lineCode.length;
+			jumpCounter++;
+			addCode();
+			codeGenScope++;
+			nodeName = astTree.getBranchNodeOfRoot();
+			generateCode();
+			calcJump(); // calculate the distance to jump
+			lineCodeLength = 0;
 		}
-		// nodeName = astTree.getBranchNodeOfRoot();
-		// generateCode();
 	} else if (nodeName === "while") {
 		whileBranch();
 	} else if (nodeName === "Block") {
@@ -471,12 +480,13 @@ function typeLookUp(id) {
 // fills in undefined indexes with 00
 function fillInCode() {
 	var i = 0;
-	while (i < generatedCode.length) {
+	while (i < 256) {
 		if (generatedCode[i] === undefined) {
 			generatedCode[i] = "00";
 		}
 		i++;
 	}
+	console.log(generatedCode.length);
 }
 
 
@@ -495,6 +505,12 @@ function addition(branch) {
 		if (digits.indexOf(astTree.getIntop1(branch)) > -1 && digits.indexOf(astTree.getIntop2(branch)) > -1) {
 			var num = parseInt(astTree.getIntop1(branch))+parseInt(astTree.getIntop2(branch));
 			return ["A0","0"+num.toString(),"A2", "01", "FF"];
+		} else if (chars.indexOf(astTree.getIntop1(branch)) > -1 || chars.indexOf(astTree.getIntop2(branch)) > -1) {
+			if (chars.indexOf(astTree.getIntop2(branch)) > -1) {
+				idAddress = addressLookUp(astTree.getIntop2(branch));
+				tempCounter++;
+				return ["A9", "0"+astTree.getIntop1(branch), "6D", idAddress, "XX", "8D", "T"+tempCounter, "XX", "AC", "T"+tempCounter, "XX", "A2", "01", "FF"];
+			} 
 		}
 	} else if (branch === "Assign") {
 		idAddress = addressLookUp(astTree.getLeafNode1()); // get the iddress of the id we are updating
