@@ -196,8 +196,9 @@ function whileBranch() {
 			nodeName = astTree.getBranchNodeOfRoot();
 			lineCodeLength = 0;
 			generatedCode();
-			tempCounter++;
-			lineCode = ["A9", "00", "8D", "T"+tempCounter, "XX", "A2", "01", "EC", "T"+tempCounter, "XX", "D0", (255-generatedCode.length).toString(16).toUpperCase()];
+			var jumpForward = (generatedCode.length+1);
+			jumpForward = 255 - jumpForward;
+			lineCode = ["A9", "00", "8D", "T"+tempCounter, "XX", "A2", "01", "EC", "T"+tempCounter, "XX", "D0", jumpForward.toString(16).toUpperCase()];
 			lineCodeLength = lineCodeLength + lineCode.length;
 			addCode();
 			calcJump();
