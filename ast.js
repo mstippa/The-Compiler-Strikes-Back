@@ -57,8 +57,7 @@ function parseBlock2() {
 		//astTree.endChildren();
 		parseBlock2();
 		astTree.endChildren();
-	}
-	console.log(currentTokenValue);	
+	}	
 }
 
 
@@ -104,9 +103,9 @@ function parsePrintStatement2() {
 	match2(); // the paren
 	parseExpr2();
 	astTree.endChildren();
-	astTree.endChildren();
-	astTree.endChildren();
-	astTree.endChildren();
+	//astTree.endChildren();
+	//astTree.endChildren();
+	//astTree.endChildren();
 	// match2(); // the paren
 }
 
@@ -178,7 +177,6 @@ function parseExpr2() {
 		parseBlock2();
 	} else if (currentTokenValue === ")") {
 		match2();
-		console.log(currentTokenValue);
 		// astTree.endChildren();
 	} 
 }
