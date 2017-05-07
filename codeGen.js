@@ -51,7 +51,6 @@ function addCode () {
 
 // generates the code
 function generateCode() {
-	//console.log(nodeName);
 	if (nodeName === "VarDecl") {
 		if (astTree.getLeafNode1() === "int") {
 			tempCounter++;
@@ -70,7 +69,7 @@ function generateCode() {
 		// checking for a digit
 		if (digits.indexOf(astTree.getLeafNode2()) > -1) {
 			lineCode = ["A9","0"+astTree.getLeafNode2(), "8D", "T"+tempCounter,"XX"];
-			addValuetoStaticTable(astTree.getLeafNode1(),astTree.getLeafNode2()); // add the value to the static table
+			addValueToStaticTable(astTree.getLeafNode1(),astTree.getLeafNode2()); // add the value to the static table
 			lineCodeLength = lineCodeLength + lineCode.length;
 			addCode();
 		} else if(astTree.getLeafNode2() === "+") {
@@ -160,30 +159,7 @@ function generateCode() {
 		// nodeName = astTree.getBranchNodeOfRoot();
 		// generateCode();
 	} else if (nodeName === "while") {
-			// checking if both things being compared are variables
-			if (chars.indexOf(astTree.getIntop1(nodeName)) > -1 && chars.indexOf(astTree.getIntop2(nodeName)) > -1) {
-				idAddress = addressLookUp(astTree.getIntop1(nodeName)); // get the address of the first id being compared
-				lineCode = ["AD", idAddress, "XX", "8D", "T"+(tempCounter+1),"XX"]; // store the id being compared in a new location
-				lineCodeLength = lineCodeLength + lineCode.length;
-				idAddress = addressLookUp(astTree.getIntop2(nodeName)); // get the address of the second id being compared
-				lineCode = lineCode.concat(["AE", "T"+(tempCounter+1) ,"XX", "EC", idAddress, "XX"]); // compare the first id to the second id
-				lineCodeLength = lineCodeLength + lineCode.length;
-				if (astTree.getLeafNode1() === "!=") {
-					if(compareValues(astTree.getIntop1(nodeName), astTree.getIntop2(nodeName))) {
-						lineCode = lineCode.concat(["A9", "00", "D0", "02"]);
-					}	
-				}
-			// checking if the first part of the expr is a digit
-			} else {
-				if (digits.indexOf(astTree.getIntop1(nodeName)) > -1) {
-					lineCode = ["A9","0"+astTree.getIntop1(nodeName), "8D", "T"+tempCounter, "XX"];
-					tempCounter++;
-					idAddress = addressLookUp(astTree.getIntop2(nodeName));
-					lineCode = lineCode.concat(["AD", idAddress, "XX", "T"+tempCounter, "XX"]); // store the id in a new address
-
-				}
-			}
-
+		whileBranch();
 	} else if (nodeName === "Block") {
 		codeGenScope++;
 		nodeName = astTree.getBranchNodeOfRoot();
@@ -197,8 +173,118 @@ function generateCode() {
 }
 
 
-function compareValues(val1, val2) {
+function whileBranch() {
+// checking if both things being compared are variables
+	if (chars.indexOf(astTree.getIntop1(nodeName)) > -1 && chars.indexOf(astTree.getIntop2(nodeName)) > -1) {
+		idAddress = addressLookUp(astTree.getIntop1(nodeName)); // get the address of the first id being compared
+		tempCounter++;
+		lineCode = ["AD", idAddress, "XX", "8D", "T"+(tempCounter),"XX"]; // store the id being compared in a new location
+		idAddress = addressLookUp(astTree.getIntop2(nodeName)); // get the address of the second id being compared
+		tempCounter++;
+		lineCode = lineCode.concat(["AE", "T"+(tempCounter-1), "XX", "EC", idAddress, "XX" ]); // compare the first value to the second value
+		addCode();
+		lineCodeLength = lineCodeLength + lineCode.length;
+		if (astTree.getLeafNode1() === "notEqual") {
+			lineCode = ["A9", "00", "D0", "02"];
+			addCode();
+			tempCounter++;
+			lineCode = ["A9", "01", "A2", "00", "8D", "T"+tempCounter, "XX", "EC", "T"+tempCounter, "XX", "D0", "J"+jumpCounter.toString()];
+			lineCodeLength = lineCodeLength + lineCode.length;
+			jumpCounter++;
+			addCode();
+			codeGenScope++;
+			nodeName = astTree.getBranchNodeOfRoot();
+			lineCodeLength = 0;
+			generatedCode();
+			tempCounter++;
+			lineCode = ["A9", "00", "8D", "T"+tempCounter, "XX", "A2", "01", "EC", "T"+tempCounter, "XX", "D0", (255-generatedCode.length).toString(16).toUpperCase()];
+			lineCodeLength = lineCodeLength + lineCode.length;
+			addCode();
+			calcJump();
+			lineCodeLength = 0;	
+		}
+	// checking if the first part of the expr is a char and the second is a digit, need to work on a better system for tempCounter
+	} else {
+		if (chars.indexOf(astTree.getIntop1(nodeName)) > -1 && digits.indexOf(astTree.getIntop2(nodeName)) > -1 ) {
+			idAddress = addressLookUp(astTree.getIntop1(nodeName));
+			tempCounter++;
+			lineCode = ["AD", idAddress, "XX", "8D", "T"+tempCounter, "XX"]; // store the id in another location
+			tempCounter++;
+			lineCode = lineCode.concat(["A9", "0"+astTree.getIntop2(nodeName).toString(), "8D", "T"+tempCounter, "XX"]); // store the constant
+			lineCode = lineCode.concat(["AE", "T"+(tempCounter-1), "XX", "EC", "T"+tempCounter, "XX"]); // compare the values
+			addCode();
+			lineCodeLength = lineCodeLength + lineCode.length;
+			if (astTree.getLeafNode1() === "notEqual") {
+				lineCode = ["A9","00", "D0", "02"]; // test is supposed to be unequal, so jump ahead 2 if they are
+				addCode();
+				tempCounter++;
+				lineCode = ["A9","01","A2", "00", "8D", "T"+tempCounter, "XX", "EC", "T"+tempCounter, "XX", "D0", "J"+jumpCounter.toString()];
+				lineCodeLength = lineCodeLength + lineCode.length;
+				jumpCounter++;
+				addCode();
+				codeGenScope++;
+				nodeName = astTree.getBranchNodeOfRoot();
+				lineCodeLength = 0;
+				generateCode();
+				var jumpForward = (generatedCode.length+1);
+				jumpForward = 255 - jumpForward;
+				lineCode = ["A9", "00", "8D", "T"+(tempCounter-2), "XX","A2", "01", "EC", "T"+(tempCounter-2), "XX", "D0", jumpForward.toString(16).toUpperCase()];
+				lineCodeLength = lineCodeLength + lineCode.length;
+				addCode();
+				calcJump(); // calculate the distance to jump
+				lineCodeLength = 0;
+			}
+		// still need to fix this	
+		} else {
+			idAddress = addressLookUp(astTree.getIntop1(nodeName));
+			lineCode = ["AD",idAddress, "8D", "T"+tempCounter, "XX"]; // load the id, store it somewhere else
+			addCode();
+			tempCounter++;
+			lineCode = ["A9", astTree.getIntop2(nodeName), "8D", "T"+tempCounter, "XX"]
+			idAddress = addressLookUp(astTree.getIntop2(nodeName));
+			lineCode = lineCode.concat(["AD", idAddress, "XX", "T"+tempCounter, "XX"]); // store the id in a new address
+			lineCode = lineCode.concat(["AE", "T"+tempCounter, "XX", "EC", "T"+(tempCounter-1), "XX"]); // compare the values
+			lineCodeLength = lineCodeLength + lineCode.length;
+			addCode();
+			if (astTree.getLeafNode1() === "!=") {
+				lineCode = ["A9","00", "D0", "02"]; // test is supposed to be unequal, so jump ahead 2 if they are
+				addCode();
+				lineCode = ["A9","01","A2", "00", "8D", "T"+(tempCounter-1), "XX", "EC", "T"+(tempCounter-1), "XX", "D0", "J"+jumpCounter.toString()];
+				lineCodeLength = lineCodeLength + lineCode.length;
+				jumpCounter++;
+				addCode();
+				codeGenScope++;
+				nodeName = astTree.getBranchNodeOfRoot();
+				lineCodeLength = 0;
+				generateCode();
+				calcJump(); // calculate the distance to jump
+				lineCodeLength = 0;
+			}
+		}	
+	}
+}	
 
+
+function getValue(val) {
+	var highestScope = -1;
+	var p = 0;
+	if (digits.indexOf(val) > -1) {
+		return val
+	} else {
+		var i = 0;
+		while (i < staticTable.length) {
+			if (staticTable[i][1] === val1) {
+				if (staticTable[i][3] === codeGenScope) {
+					return staticTable[i][1];
+				} else if (staticTable[i][3] > highestScope) {
+					highestScope = staticTable[i][3];
+					p = i;
+				}
+			}
+			i++;
+		}
+		return staticTable[p][4];
+	}
 }
 
 
@@ -212,12 +298,12 @@ function addValueToStaticTable(id, value) {
 			if (staticTable[i][3] === codGenScope) {
 				staticTable[i][4] = value;
 				break;
-			} else if (staticTable[m][3] > highestScope) {
-				highestScope = staticTable[m][3];
-				p = m;
+			} else if (staticTable[i][3] > highestScope) {
+				highestScope = staticTable[i][3];
+				p = i;
 			}
 		}
-		m++;
+		i++;
 	}
 	staticTable[p][4] = value;
 }
@@ -267,7 +353,6 @@ function addHeapToGeneratedCode() {
 			y--;
 			k--;
 		}
-		console.log(heapCode);
 		return y+1;
 	// if here then strings have been added to the heap already
 	} else {
@@ -326,14 +411,18 @@ function calcJump() {
 	var jumpDistance = lineCodeLength;
 	var i = 0;
 	while (i < generatedCode.length) {
-		console.log("J"+(jumpCounter-1));
 		if (generatedCode[i] === "J"+(jumpCounter-1)) {
 			if (jumpDistance < 10) {
 				generatedCode[i] = "0"+jumpDistance;
 				break;
 			} else {
-				generatedCode[i] = jumpDistance.toString(16);
-				break;
+				if (jumpDistance.toString(16).length > 1) {
+					generatedCode[i] = jumpDistance.toString(16);
+					break;
+				} else {
+					generatedCode[i] = "0"+jumDistance.toString(16);
+					break;
+				}
 			}
 		}
 		i++;
@@ -416,10 +505,13 @@ function addition(branch) {
 			if (digits.indexOf(astTree.getIntop1(branch)) > -1) {
 				lineCode = lineCode.concat(["A9","0"+astTree.getIntop1(branch)]);
 				lineCode = lineCode.concat(["6D", "T"+tempCounter,"XX", "8D", idAddress, "XX"]);
+				lineCodeLength = lineCodeLength + lineCode.length;
 				addCode();
 			// if here than the id is the first part of the expr	
 			} else {
 				lineCode = lineCode.concat(["AD","T"+tempCounter, "XX", ]);
+				lineCodeLength = lineCodeLength + lineCodeLength;
+				addCode();
 			}
 		}	
 	}	
