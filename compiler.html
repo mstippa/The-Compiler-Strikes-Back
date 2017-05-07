@@ -119,11 +119,33 @@
 			identifiers = [];
 			warningCounter = 0;
 			rowNum = 1;
+			generatedCode = [];
+			generatedCodeCounter = 0;
+			lineCode = [];
+			staticTable = [];
+			staticTableCounter = 0;
+			tempCounter = -1; // -1 instead of 0 because of the base case
+			idAddress = "";
+			jumpCounterArray = [];
+			jumDistance = 0;
+			nodeName = "";
+			heapCode = ["00"];
+			codGenScope = 0;
+			string = "";
+			convertedStringArray = [];
+			xregisterCounter = 1;
+			codeGenScope = 0;
+			lineCodeLength = 0;
+			currentNodeCounter = 0;
+			branchNodeCounter = 0;
+			newBranchNodeCounter = 0;
+			newBlockCurrentNodeCounter = 0;
 			cstTree = new Tree();
 			astTree = new  Tree();
 			document.getElementById("output").innerHTML = "";
 			document.getElementById("ctree").innerHTML = "";
 			document.getElementById("atree").innerHTML = "";
+			document.getElementById("codeGen").innerHTML = "";
 			var table = document.getElementById("symbolTable");
 			clearTable(table);
 
