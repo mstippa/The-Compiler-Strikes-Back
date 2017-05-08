@@ -81,7 +81,7 @@ function generateCode() {
 			var n = 0;
 			// looping to find the temporary address of an identifier
 			while (n < staticTable.length) {
-				if (staticTable[n][1] === astTree.getLeafNode2() && staticTable[n][2] === "int") {
+				if (staticTable[n][1] === astTree.getLeafNode2() /*&& staticTable[n][2] === "int"*/) {
 					idAddress = addressLookUp(astTree.getLeafNode1());
 					lineCode = ["AD", staticTable[n][0], "XX", "8D", idAddress, "XX" ];
 					lineCodeLength = lineCodeLength + lineCode.length;
