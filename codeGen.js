@@ -131,7 +131,7 @@ function generateCode() {
 		} else if (chars.indexOf(astTree.getLeafNode1()) > -1 && astTree.getLeafNode1().length > 1) {
 			lineCode = []
 		}
-		nodeName = astTree.getBranchNodeOfRoot(); 
+		nodeName = astTree.getBranchNodeOfRoot();
 		generateCode();		
 	} else if (nodeName === "if") {
 		// checking if the first part of the expr is a char
@@ -175,8 +175,16 @@ function generateCode() {
 	} else if (nodeName === "Block") {
 		codeGenScope++;
 		nodeName = astTree.getBranchNodeOfRoot();
+		console.log(nodeName);
 		generateCode();
+		// generateCode();
 	} else if (nodeName === "branch done") {
+		if (codeGenScope !== 0) {
+			astTree.getPreviousBlock();
+		}
+			nodeName = astTree.getBranchNodeOfRoot();
+			console.log(nodeName);
+			generateCode();	
 		// traversal of another block complete
 	} else if (nodeName === "done") {
 		// traversal complete
@@ -445,7 +453,6 @@ function calcJump() {
 
 // returns the temporary address of an id
 function addressLookUp(id) {
-	console.log(id);
 	var m = 0;
 	var highestScope = -1;
 	var highestScopeId = "";

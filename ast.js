@@ -183,7 +183,6 @@ function parseExpr2() {
 
 function parseStringExpr2() {
 	if (currentTokenValue === '"') {
-		console.log(charlist);
 		astTree.addNode(charlist, "leaf");
 		match2();
 	} else if (chars.indexOf(currentTokenValue) > -1 || currentTokenValue === " ") {
