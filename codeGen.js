@@ -128,8 +128,17 @@ function generateCode() {
 			lineCodeLength = lineCodeLength + lineCode.length;
 			addCode();
 		// checking for a string
-		} else if (chars.indexOf(astTree.getLeafNode1()) > -1 && astTree.getLeafNode1().length > 1) {
-			lineCode = []
+		} else if (astTree.getLeafNode1().length > 1) {
+			string = astTree.getLeafNode1();
+			convertedStringArray = replaceString(string);
+			stringToHeap(); // add the string to the heap array
+			stringLocation = addHeapToGeneratedCode(); // add what's in the heap array to the generated code and the location of the start of the array is returned
+			stringLocation = stringLocation.toString(16); // convert to hex
+			stringLocation = stringLocation.toUpperCase(); // make it uppercase
+			heapCode = ["00"]; // reset the heap array
+			lineCode = ["A0", stringLocation, "A2", "02", "FF"];
+			lineCodeLength = lineCodeLength + lineCode.length;
+			addCode();
 		}
 		nodeName = astTree.getBranchNodeOfRoot();
 		generateCode();		
