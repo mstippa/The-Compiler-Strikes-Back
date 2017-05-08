@@ -89,7 +89,9 @@ function generateCode() {
 				}
 				n++;
 			}	
-		// if here then we have a boolean or a string	
+		// if here then we have a boolean or a string
+		} else if (astTree.getLeafNode2() === "isEqual" || astTree.getLeafNode2() === "notEqual") {
+
 		} else {
 			string = astTree.getLeafNode2();
 			convertedStringArray = replaceString(string);
@@ -178,6 +180,8 @@ function generateCode() {
 			generateCode();
 			calcJump(); // calculate the distance to jump
 			lineCodeLength = 0;
+		} else {
+			
 		}
 	} else if (nodeName === "while") {
 		whileBranch();
@@ -292,6 +296,9 @@ function whileBranch() {
 			}
 		}	
 	}
+	nodeName = astTree.getBranchNodeOfRoot();
+	console.log(nodeName);
+	generateCode();
 }	
 
 

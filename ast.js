@@ -85,6 +85,8 @@ function parseIfStatement2() {
 	astTree.addNode("if", "branch");
 	match2(); // the if statement
 	parseBooleanExpr2();
+	parseBlock2();
+	astTree.endChildren();
 	//match2(); // the paren
 }
 
@@ -93,6 +95,9 @@ function parseWhileStatement2() {
 	astTree.addNode("while", "branch");
 	match2(); // the while statement
 	parseBooleanExpr2();
+	parseBlock2();
+	astTree.endChildren();
+	//astTree.endChildren();
 	//match2(); // the paren
 }
 
@@ -103,6 +108,7 @@ function parsePrintStatement2() {
 	match2(); // the paren
 	parseExpr2();
 	astTree.endChildren();
+	console.log(currentTokenValue);
 	//astTree.endChildren();
 	//astTree.endChildren();
 	//astTree.endChildren();
@@ -132,6 +138,7 @@ function parseBooleanExpr2() {
 			match2(); // the boolval
 			match2(); // the boolop
 			parseExpr2();
+			//astTree.endChildren();
 		} else {
 			astTree.addNode(currentTokenValue, "leaf");
 			match2();
@@ -146,6 +153,7 @@ function parseExpr2() {
 		match2(); // the id
 		//match2(); // the boolop
 		parseExpr2();
+		//astTree.endChildren();
 	} else if (digits.indexOf(currentTokenValue) > -1) {
 		if (tokens[parseIndex2+1][1] === "+") {
 			astTree.addNode("+", "branch");
@@ -161,6 +169,7 @@ function parseExpr2() {
 			astTree.addNode(currentTokenValue, "leaf");
 			match2(); // the digit
 			parseExpr2();
+			//astTree.endChildren();
 		}
 	} else if (currentTokenValue === '"') {
 		match2(); // the quote

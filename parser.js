@@ -570,6 +570,7 @@ function Tree() {
 
     this.getBranchNodeOfRoot = function() {
     	if (/*this.currentBranchNode.name !== "if" && this.currentBranchNode.name !== "while" && */codeGenScope === 0 /*&& this.currentBranchNode.name !== "Block"*/) {
+    		console.log(branchNodeCounter);
 	    	if (branchNodeCounter < this.numRootChildren()) {
 	    		if (codeGenScope === 0) {
 					currentNodeCounter++;
@@ -584,12 +585,13 @@ function Tree() {
 			// currentNodeCounter = 0;
 			if (this.currentBranchNode.name === "if" || this.currentBranchNode.name === "while") {
     			this.currentBranchNode = this.currentBranchNode.children[1];
+    			console.log(this.currentBranchNode);
     		}
     		if (newBranchNodeCounter < this.currentBranchNode.children.length) {
     			newBlockCurrentNodeCounter++;
-    			console.log(newBlockCurrentNodeCounter);
+    			//console.log(newBlockCurrentNodeCounter);
     			this.newCurrentBranchNode = this.currentBranchNode.children[newBlockCurrentNodeCounter-1];
-    			console.log(this.newCurrentBranchNode);
+    			//console.log(this.newCurrentBranchNode);
     			newBranchNodeCounter++;
     			if (this.newCurrentBranchNode.name === "Block") {
     				this.currentBranchNode = this.currentBranchNode.children[newBlockCurrentNodeCounter-1];
@@ -612,10 +614,7 @@ function Tree() {
     	while (i < this.currentBranchNode.children.length) {
     		if (this.currentBranchNode.children[i].name === "Block") {
     			newBranchNodeCounter = i + 1;
-    			console.log(this.currentBranchNode.children[i+1].name);
     			newBlockCurrentNodeCounter = i+1;
-    			console.log(newBranchNodeCounter);
-    			console.log(this.currentBranchNode.children.length);
     			break;
     		}
     		i++;

@@ -390,8 +390,6 @@ function typeCheck() {
 					if (findType(nextTokenValue) !== "int") {
 						semanticAnalysisError = "type mismatch on line " + tokens[parseIndex3][2] + " expecting an int";
 					} else {
-						console.log(findScope(nextTokenValue));
-						console.log(findScope(currentTokenValue));
 						if (findScope(nextTokenValue) >= findScope(currentTokenValue)) {
 							//semanticAnalysisError = "scope error on line " + tokens[parseIndex3][2];
 						} else {
