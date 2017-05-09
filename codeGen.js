@@ -116,6 +116,7 @@ function generateCode() {
 				lineCode = ["AC", idAddress,"XX", "A2", "01", "FF"];
 				lineCodeLength = lineCodeLength + lineCode.length;
 			} else {
+				console.log(astTree.getLeafNode1());
 				lineCode = ["AC", idAddress,"XX", "A2", "02", "FF"];
 				lineCodeLength = lineCodeLength + lineCode.length;
 			}
@@ -145,11 +146,11 @@ function generateCode() {
 		nodeName = astTree.getBranchNodeOfRoot();
 		generateCode();		
 	} else if (nodeName === "if") {
+		//lineCodeLength = 0;
 		// checking if the first part of the expr is a char
 		if (chars.indexOf(astTree.getIntop1(nodeName)) > -1 && chars.indexOf(astTree.getIntop2(nodeName)) > -1) {
 			idAddress = addressLookUp(astTree.getIntop1(nodeName)); // get the address of the first id being compared
 			lineCode = ["AE", idAddress, "XX"];
-			lineCodeLength = lineCodeLength + lineCode.length;
 			idAddress = addressLookUp(astTree.getIntop2(nodeName)); // get the address of the second id being compared
 			lineCode = lineCode.concat(["EC",idAddress, "XX", "D0", "J"+jumpCounter.toString()]);
 			lineCodeLength = lineCodeLength + lineCode.length;
@@ -157,32 +158,44 @@ function generateCode() {
 			addCode();
 			codeGenScope++;
 			nodeName = astTree.getBranchNodeOfRoot();
-			console.log(nodeName);
 			generateCode();
 			console.log(nodeName);
 			calcJump(); // calculate the distance to jump
 			lineCodeLength = 0;
 		} else if (digits.indexOf(astTree.getIntop2(nodeName)) > -1 || digits.indexOf(astTree.getIntop1(nodeName)) > -1) {
-			tempCounter++;
 			if (digits.indexOf(astTree.getIntop2(nodeName)) > -1) {
-				lineCode = ["A9", "0"+astTree.getIntop2(nodeName), "8D", "T"+tempCounter, "XX"];
+				lineCode = ["A2", "0"+astTree.getIntop2(nodeName)];
 				idAddress = addressLookUp(astTree.getIntop1(nodeName));
 			} else {
-				lineCode = ["A9", "0"+astTree.getIntop1(nodeName), "8D", "T"+tempCounter, "XX"];
+				lineCode = ["A2", "0"+astTree.getIntop1(nodeName)];
 				idAddress = addressLookUp(astTree.getIntop2(nodeName));
 			}
-			lineCode = lineCode.concat(["AE", idAddress, "XX", "EC", "T"+tempCounter, "XX", "D0", "J"+jumpCounter.toString()]);
+			lineCode = lineCode.concat(["EC", idAddress, "XX", "D0", "J"+jumpCounter.toString()]);
 			lineCodeLength = lineCodeLength + lineCode.length;
 			jumpCounter++;
 			addCode();
 			codeGenScope++;
 			nodeName = astTree.getBranchNodeOfRoot();
+			console.log(nodeName);
 			generateCode();
 			calcJump(); // calculate the distance to jump
 			lineCodeLength = 0;
 		} else {
-			
+			if (chars.indexOf(astTree.getIntop1(nodeName)) > -1) {
+				idAddress = addressLookUp(astTree.getIntop1(nodeName));
+			} 
+			lineCode = ["A2", "0"+astTree.getIntop2(nodeName), "EC", idAddress, "XX", "D0", "J"+jumpCounter.toString()];
+			lineCodeLength = lineCodeLength + lineCode.length;
+			jumpCounter++;
+			addCode();
+			codGenScope++;
+			nodeName = astTree.getBranchNodeOfRoot();
+			generateCode();
+			calcJump();
+			lineCodeLength = 0;
 		}
+	nodeName = astTree.getBranchNodeOfRoot();
+	generateCode();	
 	} else if (nodeName === "while") {
 		whileBranch();
 	} else if (nodeName === "Block") {
@@ -495,12 +508,20 @@ function scopeLookUp(id) {
 // looks up the type for an identifier
 function typeLookUp(id) {
 	var m = 0;
+	var highestScope = -1
+	var highestScopeType
 	while (m < staticTable.length) {
 		if (staticTable[m][1] === id) {
-			return staticTable[m][2];
+			if (staticTable[m][3] === codeGenScope) {
+				return staticTable[m][2];
+			} else if (staticTable[m][3] > highestScope) {
+				highestScope = staticTable[m][3];
+				highestScopeType = staticTable[m][2];
+			}	
 		}
 		m++;
 	}
+	return highestScopeType;
 }
 
 

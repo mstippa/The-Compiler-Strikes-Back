@@ -570,7 +570,6 @@ function Tree() {
 
     this.getBranchNodeOfRoot = function() {
     	if (/*this.currentBranchNode.name !== "if" && this.currentBranchNode.name !== "while" && */codeGenScope === 0 /*&& this.currentBranchNode.name !== "Block"*/) {
-    		console.log(branchNodeCounter);
 	    	if (branchNodeCounter < this.numRootChildren()) {
 	    		if (codeGenScope === 0) {
 					currentNodeCounter++;
@@ -585,7 +584,6 @@ function Tree() {
 			// currentNodeCounter = 0;
 			if (this.currentBranchNode.name === "if" || this.currentBranchNode.name === "while") {
     			this.currentBranchNode = this.currentBranchNode.children[1];
-    			console.log(this.currentBranchNode);
     		}
     		if (newBranchNodeCounter < this.currentBranchNode.children.length) {
     			newBlockCurrentNodeCounter++;
@@ -602,6 +600,8 @@ function Tree() {
     			return(this.newCurrentBranchNode.name);
     		} else {
     			codeGenScope--;
+    			newBlockCurrentNodeCounter = 0;
+    			newBranchNodeCounter = 0;
     			//currentNodeCounter = newBlockCurrentNodeCounter;
     			return "branch done";
     		}
